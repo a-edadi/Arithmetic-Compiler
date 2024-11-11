@@ -14,9 +14,5 @@ fn main() {
     lexer.lex_print_tokens();
 
     lexer.reset();
-    let partial_lexed_token_vec = lexer.lex_till_pos(4);
-    lexer.print_token_vec(partial_lexed_token_vec);
-
-    lexer.reset();
     lexer.lex_debug_print_tokens();
 }

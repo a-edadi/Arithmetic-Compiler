@@ -4,8 +4,8 @@ use super::token::{Token, TokenKind};
 
 use crate::Lexer;
 
+/// lexes all tokens and returns a vector of theses tokens
 impl<'a> Lexer<'a> {
-    /// lexer lexes all tokens and returns a vector of theses tokens
     pub fn lex_all_tokens(&mut self) -> Result<Vec<Token>, LexerError> {
         let mut tokens_vec = Vec::new();
 
@@ -23,26 +23,53 @@ impl<'a> Lexer<'a> {
 
         Ok(tokens_vec)
     }
+}
 
-    /// lexer continues to work till the give position and returns a Vector
-    pub fn lex_till_pos(&mut self, end_position: usize) -> Result<Vec<Token>, LexerError> {
-        let mut tokens_vec = Vec::new();
+/// Terminal Printing Utilities
+impl<'a> Lexer<'a> {
+    /// Pretty prints and lexes all tokens using only a ref to self
+    pub fn lex_print_tokens(&mut self) {
+        let tokens_result = self.lex_all_tokens();
 
-        loop {
-            match self.get_next_token() {
-                Ok(token) => {
-                    if token.kind == TokenKind::Eof {
-                        break;
-                    }
-                    if self.current_pos > end_position {
-                        break;
-                    }
-                    tokens_vec.push(token);
+        match tokens_result {
+            Ok(tokens) => {
+                for token in tokens {
+                    println!("{}", token);
                 }
-                Err(e) => return Err(e),
+            }
+            Err(e) => {
+                eprintln!("Error: {:?}", e);
             }
         }
+    }
 
-        Ok(tokens_vec)
+    /// Simple printing using the debug
+    pub fn lex_debug_print_tokens(&mut self) {
+        let tokens_result = self.lex_all_tokens();
+
+        match tokens_result {
+            Ok(tokens) => {
+                for token in tokens {
+                    println!("{:?}", token);
+                }
+            }
+            Err(e) => {
+                eprintln!("Error: {:?}", e);
+            }
+        }
+    }
+
+    /// Prints a given lexed vector input
+    pub fn print_token_vec(&mut self, vec: Result<Vec<Token>, LexerError>) {
+        match vec {
+            Ok(tokens) => {
+                for token in tokens {
+                    println!("{}", token);
+                }
+            }
+            Err(e) => {
+                eprintln!("Error: {:?}", e);
+            }
+        }
     }
 }
