@@ -1,6 +1,7 @@
 use crate::lexer::text::TextSpan;
 use std::fmt;
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenKind {
     // Literals
@@ -11,15 +12,35 @@ pub enum TokenKind {
     Minus,     // Subtraction operator: -
     Multiply,  // Multiplication operator: *
     Divide,    // Division operator: /
+    Div,       // Integer division operator: //
     Remainder, // Modulus operator: %
-    Power,     // Exponentiation operator: ^
+
+    Power, // Exponentiation operator: ^
 
     // Separators
     LeftParen,  // (
     RightParen, // )
     OpenBrace,  // {
     CloseBrace, // }
-    Comma,      // ,
+
+    // Functions
+    Sin,
+    Cos,
+    Tan,
+    Cotan,
+    ArcSin,
+    ArcCos,
+    ArcTan,
+    ArcCotan,
+    Ln,
+    Log,
+    Exp,
+    Sqrt,
+    Sqr,
+
+    // Constants
+    E,
+    Pi,
 
     // Identifier
     Func,
@@ -59,13 +80,28 @@ impl fmt::Display for TokenKind {
             TokenKind::Minus => write!(f, "Minus"),
             TokenKind::Multiply => write!(f, "Multiply"),
             TokenKind::Divide => write!(f, "Divide"),
+            TokenKind::Div => write!(f, "Div"),
             TokenKind::Remainder => write!(f, "Remainder"),
             TokenKind::Power => write!(f, "Power"),
             TokenKind::LeftParen => write!(f, "LeftParen"),
             TokenKind::RightParen => write!(f, "RightParen"),
             TokenKind::OpenBrace => write!(f, "OpenBrace"),
             TokenKind::CloseBrace => write!(f, "CloseBrace"),
-            TokenKind::Comma => write!(f, "Comma"),
+            TokenKind::Sin => write!(f, "Sin"),
+            TokenKind::Cos => write!(f, "Cos"),
+            TokenKind::Tan => write!(f, "Tan"),
+            TokenKind::Cotan => write!(f, "Cotan"),
+            TokenKind::ArcSin => write!(f, "ArcSin"),
+            TokenKind::ArcCos => write!(f, "ArcCos"),
+            TokenKind::ArcTan => write!(f, "ArcTan"),
+            TokenKind::ArcCotan => write!(f, "ArcCotan"),
+            TokenKind::Ln => write!(f, "Ln"),
+            TokenKind::Log => write!(f, "Log"),
+            TokenKind::Exp => write!(f, "Exp"),
+            TokenKind::Sqrt => write!(f, "Sqrt"),
+            TokenKind::Sqr => write!(f, "Sqr"),
+            TokenKind::E => write!(f, "E"),
+            TokenKind::Pi => write!(f, "Pi"),
             TokenKind::Func => write!(f, "Func"),
             TokenKind::Identifier => write!(f, "Identifier"),
             TokenKind::Eof => write!(f, "Eof"),

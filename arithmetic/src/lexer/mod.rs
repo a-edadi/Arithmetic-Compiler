@@ -66,6 +66,24 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    fn lex_potential_double_char_operator(
+        &mut self,
+        expected: char,
+        one_char_kind: TokenKind,
+        double_char_kind: TokenKind,
+    ) -> TokenKind {
+        if let Some(next) = self.current_char() {
+            if next == expected {
+                self.advance();
+                double_char_kind
+            } else {
+                one_char_kind
+            }
+        } else {
+            one_char_kind
+        }
+    }
+
     /// Handle the punctuations operators and separators
     fn handle_punctuation(&mut self) -> Result<TokenKind, LexerError> {
         let c = self.advance().unwrap();
@@ -74,11 +92,12 @@ impl<'a> Lexer<'a> {
             '-' => Ok(TokenKind::Minus),
             '*' => Ok(TokenKind::Multiply),
             '%' => Ok(TokenKind::Remainder),
-            '/' => Ok(TokenKind::Divide),
+            '/' => {
+                Ok(self.lex_potential_double_char_operator('/', TokenKind::Divide, TokenKind::Div))
+            }
             '(' => Ok(TokenKind::LeftParen),
             ')' => Ok(TokenKind::RightParen),
             '^' => Ok(TokenKind::Power),
-            ',' => Ok(TokenKind::Comma),
             '{' => Ok(TokenKind::OpenBrace),
             '}' => Ok(TokenKind::CloseBrace),
             _ => Err(LexerError::InvalidCharacter(c, self.current_pos - 1)),
@@ -100,8 +119,6 @@ impl<'a> Lexer<'a> {
     }
 
     /// Handle numbers
-    /// continues to collect number till it is not digit
-    /// then converts the string to number
     fn handle_number(&mut self) -> Result<i64, LexerError> {
         let start_pos = self.current_pos;
         let mut number_str = String::new();
@@ -148,8 +165,24 @@ impl<'a> Lexer<'a> {
             TokenKind::Number(number)
         } else if Self::is_identifier_start(&c) {
             let identifier = self.handle_identifier();
-            match identifier.as_str() {
+            let identifier_lower = identifier.to_lowercase();
+            match identifier_lower.as_str() {
                 "func" => TokenKind::Func,
+                "sin" => TokenKind::Sin,
+                "cos" => TokenKind::Cos,
+                "tan" => TokenKind::Tan,
+                "cotan" => TokenKind::Cotan,
+                "arcsin" => TokenKind::ArcSin,
+                "arccos" => TokenKind::ArcCos,
+                "arctan" => TokenKind::ArcTan,
+                "arccotan" => TokenKind::ArcCotan,
+                "ln" => TokenKind::Ln,
+                "log" => TokenKind::Log,
+                "exp" => TokenKind::Exp,
+                "sqrt" => TokenKind::Sqrt,
+                "sqr" => TokenKind::Sqr,
+                "e" => TokenKind::E,
+                "pi" => TokenKind::Pi,
                 _ => TokenKind::Identifier,
             }
         } else if Self::is_ascii_start(&c) {

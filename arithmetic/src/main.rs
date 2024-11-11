@@ -2,7 +2,8 @@ mod lexer;
 use lexer::Lexer;
 
 fn main() {
-    let input = "sinh(45) ,";
+
+    let input = "sinh()) sin cos log ln Sin arcCotan ee %% % /// 0909";
     let mut lexer = Lexer::new(input);
     lexer.lex_print_tokens();
 

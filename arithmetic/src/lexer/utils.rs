@@ -43,7 +43,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    /// Simple printing using the debug
+    /// each token occupies a single line
     pub fn lex_debug_print_tokens(&mut self) {
         let tokens_result = self.lex_all_tokens();
 
