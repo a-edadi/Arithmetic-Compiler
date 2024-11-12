@@ -29,76 +29,144 @@ impl<'a> Parser<'a> {
         Ok(())
     }
 
-    // Parse an expression and build the corresponding AST
     pub fn parse_expression(&mut self) -> Result<ASTNode, CompilerError> {
-        let mut node = self.parse_term()?; // Start with the first term
+        let mut node = self.parse_term()?; // Start with parsing a term
 
-        // Handle addition and subtraction
-        while self.current_token.kind == TokenKind::Plus
-            || self.current_token.kind == TokenKind::Minus
-        {
-            let op = self.current_token.kind.clone(); // Clone the operator kind
+        while matches!(self.current_token.kind, TokenKind::Plus | TokenKind::Minus) {
+            let op = self.current_token.kind.clone();
             self.advance()?;
             let right_node = self.parse_term()?;
-            node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node)); // Create a binary operation node
+            node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node));
         }
 
         Ok(node)
     }
 
-    // Parse a term (handles * and / operations)
+    // Parse a term (handles *, /, and exponentiation)
     pub fn parse_term(&mut self) -> Result<ASTNode, CompilerError> {
-        let mut node = self.parse_factor()?; // Start with the first factor
+        let mut node = self.parse_factor()?;
 
-        // Handle multiplication and division
-        while self.current_token.kind == TokenKind::Multiply
-            || self.current_token.kind == TokenKind::Divide
-        {
-            let op = self.current_token.kind.clone(); // Clone the operator kind
+        while matches!(
+            self.current_token.kind,
+            TokenKind::Multiply | TokenKind::Divide | TokenKind::Power
+        ) {
+            let op = self.current_token.kind.clone();
             self.advance()?;
             let right_node = self.parse_factor()?;
-
-            // Handle division by zero
-            if let (TokenKind::Divide, ASTNode::Number(0.0)) = (&op, &right_node) {
-                return Err(CompilerError::DivisionByZero(self.lexer.get_position()));
-            }
-
-            node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node)); // Create a binary operation node
+            node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node));
         }
 
         Ok(node)
     }
 
-    // Parse a factor (a number or a parenthesized expression)
     pub fn parse_factor(&mut self) -> Result<ASTNode, CompilerError> {
         match &self.current_token.kind {
-            // Handle a number
+            // Handle unary minus (negation)
+            TokenKind::Minus => {
+                self.advance()?; // Consume the minus
+                let operand = self.parse_factor()?; // Parse the next factor (it can be a number, parentheses, etc.)
+                Ok(ASTNode::UnaryOp(TokenKind::Minus, Box::new(operand))) // Return a unary negation node
+            }
+
+            // Handle unary plus (optional, but for completeness)
+            TokenKind::Plus => {
+                self.advance()?; // Consume the plus
+                let operand = self.parse_factor()?; // Parse the next factor
+                Ok(operand) // Just return the operand, as unary plus does not change the value
+            }
+
+            // Number literal
             TokenKind::Number(n) => {
-                let value = *n; // Use the number directly (n is already i64 or f64)
+                let value = *n;
+                self.advance()?;
+                Ok(ASTNode::Number(value))
+            }
+
+            // Handle constants (E and Pi)
+            TokenKind::E => {
+                self.advance()?;
+                Ok(ASTNode::Constant(std::f64::consts::E))
+            }
+            TokenKind::Pi => {
+                self.advance()?;
+                Ok(ASTNode::Constant(std::f64::consts::PI))
+            }
+
+            // Handle functions (Sin, Cos, Tan, etc.)
+            TokenKind::Sin
+            | TokenKind::Cos
+            | TokenKind::Tan
+            | TokenKind::Cotan
+            | TokenKind::ArcSin
+            | TokenKind::ArcCos
+            | TokenKind::ArcTan
+            | TokenKind::ArcCotan
+            | TokenKind::Ln
+            | TokenKind::Log
+            | TokenKind::Exp
+            | TokenKind::Sqrt
+            | TokenKind::Sqr => {
+                let func_name = self.current_token.kind.clone();
                 self.advance()?;
 
-                // Check if the next token is also a number without an operator between them
-                if let TokenKind::Number(_) = self.current_token.kind {
-                    return Err(CompilerError::MissingOperator(Some(
-                        "2 consecutive numbers were passed without an operator".to_string(),
-                    )));
+                if self.current_token.kind != TokenKind::LeftParen {
+                    return Err(CompilerError::UnexpectedToken(
+                        self.current_token.kind.clone(),
+                    ));
                 }
-
-                Ok(ASTNode::Number(value as f64))
-            }
-            // Handle parenthesized expression
-            TokenKind::LeftParen => {
                 self.advance()?; // Skip '('
-                let node = self.parse_expression()?; // Parse inner expression
+                let argument = self.parse_expression()?;
                 if self.current_token.kind != TokenKind::RightParen {
-                    return Err(CompilerError::MissingToken(")".to_string())); // Check for closing ')'
+                    return Err(CompilerError::MissingToken(")".to_string()));
+                }
+                self.advance()?; // Skip ')'
+
+                let func_name = match func_name {
+                    TokenKind::Sin => "sin",
+                    TokenKind::Cos => "cos",
+                    TokenKind::Tan => "tan",
+                    TokenKind::Cotan => "cotan",
+                    TokenKind::ArcSin => "arcsin",
+                    TokenKind::ArcCos => "arccos",
+                    TokenKind::ArcTan => "arctan",
+                    TokenKind::ArcCotan => "arccotan",
+                    TokenKind::Ln => "ln",
+                    TokenKind::Log => "log",
+                    TokenKind::Exp => "exp",
+                    TokenKind::Sqrt => "sqrt",
+                    TokenKind::Sqr => "sqr",
+                    _ => {
+                        return Err(CompilerError::UnexpectedToken(
+                            self.current_token.kind.clone(),
+                        ))
+                    }
+                };
+
+                Ok(ASTNode::FunctionCall(
+                    func_name.to_string(),
+                    Box::new(argument),
+                ))
+            }
+
+            // Handle variables or identifiers
+            TokenKind::Identifier(id) => {
+                let identifier = id.clone();
+                self.advance()?;
+                Ok(ASTNode::Identifier(identifier))
+            }
+
+            // Parentheses for grouping expressions
+            TokenKind::LeftParen => {
+                self.advance()?;
+                let node = self.parse_expression()?;
+                if self.current_token.kind != TokenKind::RightParen {
+                    return Err(CompilerError::MissingToken(")".to_string()));
                 }
                 self.advance()?; // Skip ')'
                 Ok(node)
             }
-            // Handle unmatched closing parenthesis
-            TokenKind::RightParen => Err(CompilerError::MissingToken("(".to_string())),
-            // Handle unexpected token
+
+            // Unexpected token
             _ => Err(CompilerError::UnexpectedToken(
                 self.current_token.kind.clone(),
             )),

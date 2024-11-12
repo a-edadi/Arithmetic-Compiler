@@ -41,7 +41,7 @@ pub enum TokenKind {
 
     // Identifier
     Func,
-    Identifier,
+    Identifier(String),
 
     // Other
     Eof,
@@ -98,7 +98,7 @@ impl fmt::Display for TokenKind {
             TokenKind::E => write!(f, "E"),
             TokenKind::Pi => write!(f, "π"),
             TokenKind::Func => write!(f, "Func"),
-            TokenKind::Identifier => write!(f, "Identifier"),
+            TokenKind::Identifier(string) => write!(f, "Identifier({})", string),
             TokenKind::Eof => write!(f, "Eof"),
         }
     }

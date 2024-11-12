@@ -115,8 +115,8 @@ impl<'a> Lexer<'a> {
 
             TokenKind::Number(number)
         } else if Self::is_identifier_start(&c) {
-            let identifier = self.handle_identifier();
-            let identifier_lower = identifier?.to_lowercase();
+            let identifier = self.handle_identifier()?;
+            let identifier_lower = identifier.to_lowercase();
 
             match identifier_lower.as_str() {
                 "func" => TokenKind::Func,
@@ -137,7 +137,7 @@ impl<'a> Lexer<'a> {
                 "pi" => TokenKind::Pi,
                 "div" => TokenKind::Div,
                 "mod" => TokenKind::Remainder,
-                _ => TokenKind::Identifier,
+                _ => TokenKind::Identifier(identifier),
             }
         } else if Self::is_ascii_start(&c) {
             self.handle_punctuation()?
