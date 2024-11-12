@@ -1,4 +1,5 @@
 mod errors;
+mod handlers;
 mod text;
 mod token;
 mod utils;
@@ -37,106 +38,14 @@ impl<'a> Lexer<'a> {
         c
     }
 
+    /// Returns the next char without moving the position of the lexer
+    fn peek_char(&self) -> Option<char> {
+        self.input.chars().nth(self.current_pos)
+    }
+
     /// resets the lexer position so the input can be lexed again without the need to re initialize
     pub fn reset(&mut self) {
         self.current_pos = 0;
-    }
-
-    /// Utilities to categorize kind
-    fn is_number_start(c: &char) -> bool {
-        c.is_ascii_digit()
-    }
-
-    fn is_identifier_start(c: &char) -> bool {
-        c.is_alphabetic() || c == &'_'
-    }
-
-    fn is_ascii_start(c: &char) -> bool {
-        c.is_ascii()
-    }
-
-    /// Skip White spaces.
-    fn skip_whitespace(&mut self) {
-        while let Some(c) = self.current_char() {
-            if c.is_whitespace() {
-                self.advance();
-            } else {
-                break;
-            }
-        }
-    }
-
-    fn lex_potential_double_char_operator(
-        &mut self,
-        expected: char,
-        one_char_kind: TokenKind,
-        double_char_kind: TokenKind,
-    ) -> TokenKind {
-        if let Some(next) = self.current_char() {
-            if next == expected {
-                self.advance();
-                double_char_kind
-            } else {
-                one_char_kind
-            }
-        } else {
-            one_char_kind
-        }
-    }
-
-    /// Handle the punctuations operators and separators
-    fn handle_punctuation(&mut self) -> Result<TokenKind, LexerError> {
-        let c = self.advance().unwrap();
-        match c {
-            '+' => Ok(TokenKind::Plus),
-            '-' => Ok(TokenKind::Minus),
-            '*' => Ok(TokenKind::Multiply),
-            '%' => Ok(TokenKind::Remainder),
-            '/' => {
-                Ok(self.lex_potential_double_char_operator('/', TokenKind::Divide, TokenKind::Div))
-            }
-            '(' => Ok(TokenKind::LeftParen),
-            ')' => Ok(TokenKind::RightParen),
-            '^' => Ok(TokenKind::Power),
-            '{' => Ok(TokenKind::OpenBrace),
-            '}' => Ok(TokenKind::CloseBrace),
-            _ => Err(LexerError::InvalidCharacter(c, self.current_pos - 1)),
-        }
-    }
-
-    /// tokenize the input so we can returns identifiers
-    fn handle_identifier(&mut self) -> String {
-        let mut identifier = String::new();
-        while let Some(c) = self.current_char() {
-            if Self::is_identifier_start(&c) {
-                self.advance().unwrap();
-                identifier.push(c);
-            } else {
-                break;
-            }
-        }
-        identifier
-    }
-
-    /// Handle numbers
-    fn handle_number(&mut self) -> Result<i64, LexerError> {
-        let start_pos = self.current_pos;
-        let mut number_str = String::new();
-
-        while let Some(c) = self.current_char() {
-            if c.is_ascii_digit() {
-                number_str.push(c);
-                self.advance();
-            } else {
-                break;
-            }
-        }
-
-        if let Ok(number) = number_str.parse::<i64>() {
-            Ok(number)
-        } else {
-            Err(LexerError::InvalidNumber(number_str, start_pos))
-        }
     }
 
     pub fn get_next_token(&mut self) -> Result<Token, LexerError> {
@@ -157,6 +66,18 @@ impl<'a> Lexer<'a> {
         };
 
         let start = self.current_pos;
+
+        // Check for line comments
+        if c == '/' && self.peek_char() == Some('/') {
+            self.handle_line_comment();
+            return self.get_next_token();
+        }
+
+        // Check for block comments
+        if c == '{' {
+            self.handle_block_comment();
+            return self.get_next_token();
+        }
 
         let kind = if Self::is_number_start(&c) {
             let number = self

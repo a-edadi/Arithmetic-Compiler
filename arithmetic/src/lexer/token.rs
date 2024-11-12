@@ -20,8 +20,6 @@ pub enum TokenKind {
     // Separators
     LeftParen,  // (
     RightParen, // )
-    OpenBrace,  // {
-    CloseBrace, // }
 
     // Functions
     Sin,
@@ -85,8 +83,6 @@ impl fmt::Display for TokenKind {
             TokenKind::Power => write!(f, "Power"),
             TokenKind::LeftParen => write!(f, "LeftParen"),
             TokenKind::RightParen => write!(f, "RightParen"),
-            TokenKind::OpenBrace => write!(f, "OpenBrace"),
-            TokenKind::CloseBrace => write!(f, "CloseBrace"),
             TokenKind::Sin => write!(f, "Sin"),
             TokenKind::Cos => write!(f, "Cos"),
             TokenKind::Tan => write!(f, "Tan"),
