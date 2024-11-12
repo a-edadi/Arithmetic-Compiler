@@ -38,7 +38,7 @@ impl<'a> Lexer<'a> {
                 }
             }
             Err(e) => {
-                eprintln!("Error: {:?}", e);
+                eprintln!("Error: {}", e);
             }
         }
     }

@@ -58,7 +58,11 @@ impl<'a> Lexer<'a> {
             '(' => Ok(TokenKind::LeftParen),
             ')' => Ok(TokenKind::RightParen),
             '^' => Ok(TokenKind::Power),
-            _ => Err(LexerError::InvalidCharacter(c, self.current_pos - 1)),
+            _ => Err(LexerError::InvalidCharacter(
+                c,
+                self.line,
+                self.current_pos - 1,
+            )),
         }
     }
 
@@ -93,7 +97,7 @@ impl<'a> Lexer<'a> {
         if let Ok(number) = number_str.parse::<i64>() {
             Ok(number)
         } else {
-            Err(LexerError::InvalidNumber(number_str, start_pos))
+            Err(LexerError::InvalidNumber(number_str, self.line, start_pos))
         }
     }
 }

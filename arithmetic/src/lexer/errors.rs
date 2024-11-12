@@ -2,22 +2,34 @@ use std::fmt;
 
 #[derive(Debug, PartialEq)]
 pub enum LexerError {
-    InvalidCharacter(char, usize),
-    InvalidNumber(String, usize),
-    UnexpectedError(usize),
+    InvalidCharacter(char, usize, usize),
+    InvalidNumber(String, usize, usize),
+    UnexpectedError(usize, usize),
 }
 
 impl fmt::Display for LexerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            LexerError::InvalidNumber(num, pos) => {
-                write!(f, "Error: Invalid number '{}' at position {}", num, pos)
+            LexerError::InvalidNumber(num,line , pos) => {
+                write!(
+                    f,
+                    "Error: Invalid number '{}', In line: {}, at position {}",
+                    num, line, pos
+                )
             }
-            LexerError::InvalidCharacter(char, pos) => {
-                write!(f, "Error: Invalid Char '{}' at position {}", char, pos)
+            LexerError::InvalidCharacter(char, line, pos) => {
+                write!(
+                    f,
+                    "Error: Invalid Char '{}', In line: {}, at position {}",
+                    char, line, pos
+                )
             }
-            LexerError::UnexpectedError(pos) => {
-                write!(f, "Error: Unexpected Error Occurred at position : {}", pos)
+            LexerError::UnexpectedError(line,pos ) => {
+                write!(
+                    f,
+                    "Error: Unexpected Error Occurred in Line: {}, at position: {}",
+                    line, pos
+                )
             }
         }
     }

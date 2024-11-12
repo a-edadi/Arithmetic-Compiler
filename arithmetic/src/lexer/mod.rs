@@ -11,6 +11,7 @@ use token::{Token, TokenKind};
 pub struct Lexer<'a> {
     input: &'a str,
     current_pos: usize,
+    line: usize,
 }
 
 impl<'a> Lexer<'a> {
@@ -19,6 +20,7 @@ impl<'a> Lexer<'a> {
         Self {
             input,
             current_pos: 0,
+            line: 1,
         }
     }
 
@@ -35,6 +37,10 @@ impl<'a> Lexer<'a> {
         let c = self.current_char();
         self.current_pos += 1;
 
+        if c == Some('\n') {
+            self.line += 1;
+        }
+
         c
     }
 
@@ -46,6 +52,7 @@ impl<'a> Lexer<'a> {
     /// resets the lexer position so the input can be lexed again without the need to re initialize
     pub fn reset(&mut self) {
         self.current_pos = 0;
+        self.line = 1;
     }
 
     pub fn get_next_token(&mut self) -> Result<Token, LexerError> {
@@ -62,9 +69,14 @@ impl<'a> Lexer<'a> {
 
         let c = match self.current_char() {
             Some(ch) => ch,
-            None => return Err(LexerError::InvalidCharacter('\0', self.current_pos)),
+            None => {
+                return Err(LexerError::InvalidCharacter(
+                    '\0',
+                    self.line,
+                    self.current_pos,
+                ))
+            }
         };
-
         let start = self.current_pos;
 
         // Check for line comments
@@ -82,7 +94,7 @@ impl<'a> Lexer<'a> {
         let kind = if Self::is_number_start(&c) {
             let number = self
                 .handle_number()
-                .map_err(|_| LexerError::UnexpectedError(self.current_pos))?;
+                .map_err(|_| LexerError::UnexpectedError(self.line, self.current_pos))?;
             TokenKind::Number(number)
         } else if Self::is_identifier_start(&c) {
             let identifier = self.handle_identifier();
@@ -109,7 +121,7 @@ impl<'a> Lexer<'a> {
         } else if Self::is_ascii_start(&c) {
             self.handle_punctuation()?
         } else {
-            return Err(LexerError::UnexpectedError(self.current_pos));
+            return Err(LexerError::UnexpectedError(self.line, self.current_pos));
         };
 
         let end = self.current_pos;

@@ -14,8 +14,7 @@ pub enum TokenKind {
     Divide,    // Division operator: /
     Div,       // Integer division operator: //
     Remainder, // Modulus operator: %
-
-    Power, // Exponentiation operator: ^
+    Power,     // Exponentiation operator: ^
 
     // Separators
     LeftParen,  // (
