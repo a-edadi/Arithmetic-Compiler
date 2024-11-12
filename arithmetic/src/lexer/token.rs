@@ -5,7 +5,7 @@ use std::fmt;
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenKind {
     // Literals
-    Number(i64),
+    Number(f64),
 
     // Operators
     Plus,      // Addition operator: +
@@ -96,7 +96,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Sqrt => write!(f, "Sqrt"),
             TokenKind::Sqr => write!(f, "Sqr"),
             TokenKind::E => write!(f, "E"),
-            TokenKind::Pi => write!(f, "Pi"),
+            TokenKind::Pi => write!(f, "π"),
             TokenKind::Func => write!(f, "Func"),
             TokenKind::Identifier => write!(f, "Identifier"),
             TokenKind::Eof => write!(f, "Eof"),

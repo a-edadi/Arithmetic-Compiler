@@ -77,6 +77,7 @@ impl<'a> Lexer<'a> {
                 ))
             }
         };
+        // used for span start and end
         let start = self.current_pos;
 
         // Check for line comments
@@ -95,6 +96,7 @@ impl<'a> Lexer<'a> {
             let number = self
                 .handle_number()
                 .map_err(|_| LexerError::UnexpectedError(self.line, self.current_pos))?;
+
             // After parsing the number, check if the next character is part of an invalid identifier
             if let Some(next_char) = self.peek_char() {
                 if Self::is_identifier_start(&next_char) {
@@ -104,10 +106,12 @@ impl<'a> Lexer<'a> {
                     ));
                 }
             }
+
             TokenKind::Number(number)
         } else if Self::is_identifier_start(&c) {
             let identifier = self.handle_identifier();
             let identifier_lower = identifier?.to_lowercase();
+
             match identifier_lower.as_str() {
                 "func" => TokenKind::Func,
                 "sin" => TokenKind::Sin,
@@ -125,6 +129,8 @@ impl<'a> Lexer<'a> {
                 "sqr" => TokenKind::Sqr,
                 "e" => TokenKind::E,
                 "pi" => TokenKind::Pi,
+                "div" => TokenKind::Div,
+                "mod" => TokenKind::Remainder,
                 _ => TokenKind::Identifier,
             }
         } else if Self::is_ascii_start(&c) {

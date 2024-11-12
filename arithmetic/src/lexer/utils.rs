@@ -25,9 +25,8 @@ impl<'a> Lexer<'a> {
     }
 }
 
-/// Terminal Printing Utilities
+/// Terminal Printing Utility
 impl<'a> Lexer<'a> {
-    /// Pretty prints and lexes all tokens using only a ref to self
     pub fn lex_print_tokens(&mut self) {
         let tokens_result = self.lex_all_tokens();
 
@@ -39,36 +38,6 @@ impl<'a> Lexer<'a> {
             }
             Err(e) => {
                 eprintln!("Error: {}", e);
-            }
-        }
-    }
-
-    /// each token occupies a single line
-    pub fn lex_debug_print_tokens(&mut self) {
-        let tokens_result = self.lex_all_tokens();
-
-        match tokens_result {
-            Ok(tokens) => {
-                for token in tokens {
-                    println!("{:?}", token);
-                }
-            }
-            Err(e) => {
-                eprintln!("Error: {:?}", e);
-            }
-        }
-    }
-
-    /// Prints a given lexed vector input
-    pub fn print_token_vec(&mut self, vec: Result<Vec<Token>, LexerError>) {
-        match vec {
-            Ok(tokens) => {
-                for token in tokens {
-                    println!("{}", token);
-                }
-            }
-            Err(e) => {
-                eprintln!("Error: {:?}", e);
             }
         }
     }

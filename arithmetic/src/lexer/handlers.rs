@@ -99,21 +99,29 @@ impl<'a> Lexer<'a> {
 
         Ok(identifier)
     }
+
     /// Handle numbers by collecting the numbers inside a string and parsing them
-    pub fn handle_number(&mut self) -> Result<i64, LexerError> {
+    pub fn handle_number(&mut self) -> Result<f64, LexerError> {
         let start_pos = self.current_pos;
         let mut number_str = String::new();
+        let mut has_dot = false;
 
         while let Some(c) = self.current_char() {
             if c.is_ascii_digit() {
                 number_str.push(c);
+                self.advance();
+            } else if c == '.' && !has_dot {
+                // Allow only one decimal point
+                number_str.push(c);
+                has_dot = true;
                 self.advance();
             } else {
                 break;
             }
         }
 
-        if let Ok(number) = number_str.parse::<i64>() {
+        // Try to parse the number as f64
+        if let Ok(number) = number_str.parse::<f64>() {
             Ok(number)
         } else {
             Err(LexerError::InvalidNumber(number_str, self.line, start_pos))
