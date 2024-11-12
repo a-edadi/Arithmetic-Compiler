@@ -5,7 +5,7 @@ pub enum LexerError {
     InvalidCharacter(char, usize, usize),
     InvalidNumber(String, usize, usize),
     UnexpectedError(usize, usize),
-    InvalidIdentifierStart(usize, usize, char),
+    InvalidIdentifierStart(usize, usize),
 }
 
 impl fmt::Display for LexerError {
@@ -32,11 +32,11 @@ impl fmt::Display for LexerError {
                     line, pos
                 )
             }
-            LexerError::InvalidIdentifierStart(line, pos, c) => {
+            LexerError::InvalidIdentifierStart(line, pos) => {
                 write!(
                     f,
-                    "Error: Identifier cannot start with a number. Found '{}' at line {}, position {}",
-                    c, line, pos
+                    "Error: Identifier cannot start with a number found at at line {}, position {}",
+                    line, pos
                 )
             }
         }

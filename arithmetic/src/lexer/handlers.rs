@@ -80,7 +80,6 @@ impl<'a> Lexer<'a> {
                 return Err(LexerError::InvalidIdentifierStart(
                     self.line,
                     self.current_pos,
-                    c,
                 ));
             } else if Self::is_identifier_start(&c) {
                 identifier.push(c);

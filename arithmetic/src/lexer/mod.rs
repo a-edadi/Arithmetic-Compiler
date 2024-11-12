@@ -95,6 +95,15 @@ impl<'a> Lexer<'a> {
             let number = self
                 .handle_number()
                 .map_err(|_| LexerError::UnexpectedError(self.line, self.current_pos))?;
+            // After parsing the number, check if the next character is part of an invalid identifier
+            if let Some(next_char) = self.peek_char() {
+                if Self::is_identifier_start(&next_char) {
+                    return Err(LexerError::InvalidIdentifierStart(
+                        self.line,
+                        self.current_pos,
+                    ));
+                }
+            }
             TokenKind::Number(number)
         } else if Self::is_identifier_start(&c) {
             let identifier = self.handle_identifier();
