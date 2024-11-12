@@ -1,4 +1,4 @@
-use super::errors::LexerError;
+use super::CompilerError;
 use super::token::TokenKind;
 use crate::Lexer;
 
@@ -49,7 +49,7 @@ impl<'a> Lexer<'a> {
     }
 
     /// Handle the punctuations operators and separators
-    pub fn handle_punctuation(&mut self) -> Result<TokenKind, LexerError> {
+    pub fn handle_punctuation(&mut self) -> Result<TokenKind, CompilerError> {
         let c = self.advance().unwrap();
         match c {
             '+' => Ok(TokenKind::Plus),
@@ -62,7 +62,7 @@ impl<'a> Lexer<'a> {
             '(' => Ok(TokenKind::LeftParen),
             ')' => Ok(TokenKind::RightParen),
             '^' => Ok(TokenKind::Power),
-            _ => Err(LexerError::InvalidCharacter(
+            _ => Err(CompilerError::InvalidCharacter(
                 c,
                 self.line,
                 self.current_pos - 1,
@@ -70,14 +70,14 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn handle_identifier(&mut self) -> Result<String, LexerError> {
+    pub fn handle_identifier(&mut self) -> Result<String, CompilerError> {
         let mut identifier = String::new();
 
         // Ensure the first character is valid for the start of an identifier
         if let Some(c) = self.current_char() {
             if c.is_digit(10) {
                 // If the identifier starts with a number, raise an error
-                return Err(LexerError::InvalidIdentifierStart(
+                return Err(CompilerError::InvalidIdentifierStart(
                     self.line,
                     self.current_pos,
                 ));
@@ -101,7 +101,7 @@ impl<'a> Lexer<'a> {
     }
 
     /// Handle numbers by collecting the numbers inside a string and parsing them
-    pub fn handle_number(&mut self) -> Result<f64, LexerError> {
+    pub fn handle_number(&mut self) -> Result<f64, CompilerError> {
         let start_pos = self.current_pos;
         let mut number_str = String::new();
         let mut has_dot = false;
@@ -124,7 +124,7 @@ impl<'a> Lexer<'a> {
         if let Ok(number) = number_str.parse::<f64>() {
             Ok(number)
         } else {
-            Err(LexerError::InvalidNumber(number_str, self.line, start_pos))
+            Err(CompilerError::InvalidNumber(number_str, self.line, start_pos))
         }
     }
 }

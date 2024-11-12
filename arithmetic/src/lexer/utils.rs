@@ -1,12 +1,12 @@
-use crate::lexer::errors::LexerError;
+use super::CompilerError;
 
 use super::token::{Token, TokenKind};
 
 use crate::Lexer;
-
 /// lexes all tokens and returns a vector of theses tokens
 impl<'a> Lexer<'a> {
-    pub fn lex_all_tokens(&mut self) -> Result<Vec<Token>, LexerError> {
+    #[allow(dead_code)]
+    pub fn lex_all_tokens(&mut self) -> Result<Vec<Token>, CompilerError> {
         let mut tokens_vec = Vec::new();
 
         loop {
@@ -27,6 +27,7 @@ impl<'a> Lexer<'a> {
 
 /// Terminal Printing Utility
 impl<'a> Lexer<'a> {
+    #[allow(dead_code)]
     pub fn lex_print_tokens(&mut self) {
         let tokens_result = self.lex_all_tokens();
 

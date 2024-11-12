@@ -1,15 +1,19 @@
+mod errors;
 mod lexer;
+mod parser;
+
 use lexer::Lexer;
-
+use parser::{ast::print_ast, Parser};
 fn main() {
-    let input = "xY__2__2 -3//dfsdfds
-    ///
-    34
-    sd
-    32
+    let input = "1 + 2";
+    let  lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer).unwrap();
+    match parser.parse_expression() {
+        Ok(ast) => {
+            println!("AST:");
 
-    ";
-    let mut lexer = Lexer::new(input);
-    lexer.lex_print_tokens();
-    lexer.reset();
+            print_ast(&ast, "".to_string(), false);
+        }
+        Err(error) => println!("{}", error),
+    }
 }
