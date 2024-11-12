@@ -11,6 +11,10 @@ impl<'a> Lexer<'a> {
         c.is_alphabetic() || c == &'_'
     }
 
+    fn is_identifier_continuation(c: &char) -> bool {
+        c.is_alphanumeric() || *c == '_'
+    }
+
     pub fn is_ascii_start(c: &char) -> bool {
         c.is_ascii()
     }
@@ -66,20 +70,36 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    /// tokenize the input so we can return identifiers
-    pub fn handle_identifier(&mut self) -> String {
+    pub fn handle_identifier(&mut self) -> Result<String, LexerError> {
         let mut identifier = String::new();
-        while let Some(c) = self.current_char() {
-            if Self::is_identifier_start(&c) {
-                self.advance().unwrap();
+
+        // Ensure the first character is valid for the start of an identifier
+        if let Some(c) = self.current_char() {
+            if c.is_digit(10) {
+                // If the identifier starts with a number, raise an error
+                return Err(LexerError::InvalidIdentifierStart(
+                    self.line,
+                    self.current_pos,
+                    c,
+                ));
+            } else if Self::is_identifier_start(&c) {
                 identifier.push(c);
+                self.advance();
+            }
+        }
+
+        // Continue adding while valid identifier characters (alphanumeric or underscore)
+        while let Some(c) = self.current_char() {
+            if Self::is_identifier_continuation(&c) {
+                identifier.push(c);
+                self.advance();
             } else {
                 break;
             }
         }
-        identifier
-    }
 
+        Ok(identifier)
+    }
     /// Handle numbers by collecting the numbers inside a string and parsing them
     pub fn handle_number(&mut self) -> Result<i64, LexerError> {
         let start_pos = self.current_pos;

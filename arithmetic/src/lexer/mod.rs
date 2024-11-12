@@ -98,7 +98,7 @@ impl<'a> Lexer<'a> {
             TokenKind::Number(number)
         } else if Self::is_identifier_start(&c) {
             let identifier = self.handle_identifier();
-            let identifier_lower = identifier.to_lowercase();
+            let identifier_lower = identifier?.to_lowercase();
             match identifier_lower.as_str() {
                 "func" => TokenKind::Func,
                 "sin" => TokenKind::Sin,

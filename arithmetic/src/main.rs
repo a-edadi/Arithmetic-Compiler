@@ -6,7 +6,7 @@ fn main() {
     let input = "sinh() sin cos  
     log ln 
     sin 
-    ! 
+    xY_2__z_
     ";
     let mut lexer = Lexer::new(input);
     lexer.lex_print_tokens();
