@@ -7,6 +7,10 @@ pub enum TokenKind {
     // Literals
     Number(f64),
 
+    // Identifier
+    Func,
+    Identifier(String),
+
     // Operators
     Plus,     // Addition operator: +
     Minus,    // Subtraction operator: -
@@ -39,10 +43,6 @@ pub enum TokenKind {
     E,
     Pi,
 
-    // Identifier
-    Func,
-    Identifier(String),
-
     // Other
     Eof,
 }
@@ -73,15 +73,24 @@ impl fmt::Display for TokenKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             TokenKind::Number(num) => write!(f, "Number({})", num),
-            TokenKind::Plus => write!(f, "Plus"),
-            TokenKind::Minus => write!(f, "Minus"),
-            TokenKind::Multiply => write!(f, "Multiply"),
-            TokenKind::Divide => write!(f, "Divide"),
-            TokenKind::Div => write!(f, "Div"),
-            TokenKind::Mod => write!(f, "Modulus"),
-            TokenKind::Power => write!(f, "Power"),
-            TokenKind::LeftParen => write!(f, "LeftParen"),
-            TokenKind::RightParen => write!(f, "RightParen"),
+            TokenKind::Plus => write!(f, "+"),
+            // TokenKind::Plus => write!(f, "Plus"),
+            TokenKind::Minus => write!(f, "-"),
+            // TokenKind::Minus => write!(f, "Minus"),
+            TokenKind::Multiply => write!(f, "*"),
+            // TokenKind::Multiply => write!(f, "Multiply"),
+            TokenKind::Divide => write!(f, "/"),
+            // TokenKind::Divide => write!(f, "Divide"),
+            TokenKind::Div => write!(f, "div"),
+            // TokenKind::Div => write!(f, "Div"),
+            TokenKind::Mod => write!(f, "mod"),
+            // TokenKind::Mod => write!(f, "Modulus"),
+            TokenKind::Power => write!(f, "^"),
+            // TokenKind::Power => write!(f, "Power"),
+            TokenKind::LeftParen => write!(f, "("),
+            // TokenKind::LeftParen => write!(f, "LeftParen"),
+            TokenKind::RightParen => write!(f, ")"),
+            // TokenKind::RightParen => write!(f, "RightParen"),
             TokenKind::Sin => write!(f, "Sin"),
             TokenKind::Cos => write!(f, "Cos"),
             TokenKind::Tan => write!(f, "Tan"),

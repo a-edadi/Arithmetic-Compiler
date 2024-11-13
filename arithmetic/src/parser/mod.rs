@@ -1,5 +1,6 @@
 pub mod ast;
-
+pub mod postfix;
+pub mod utils;
 use crate::errors::CompilerError;
 
 use super::lexer::{
@@ -21,6 +22,12 @@ impl<'a> Parser<'a> {
             lexer,
             current_token,
         })
+    }
+
+    #[allow(dead_code)]
+    pub fn reset(&mut self) {
+        self.lexer.reset();
+        self.current_token = self.lexer.get_next_token().unwrap();
     }
 
     // Parser Advance method: Calls the lexer to get the next token
@@ -46,11 +53,20 @@ impl<'a> Parser<'a> {
     pub fn parse_term(&mut self) -> Result<ASTNode, CompilerError> {
         let mut node = self.parse_factor()?;
 
+        while matches!(self.current_token.kind, TokenKind::Power) {
+            let op = self.current_token.kind.clone();
+            self.advance()?;
+            let right_node = self.parse_factor()?;
+
+            // Since exponentiation is right-associative, we process right operand first
+            node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node));
+        }
+
         while matches!(
             self.current_token.kind,
             TokenKind::Multiply
                 | TokenKind::Divide
-                | TokenKind::Power
+                // | TokenKind::Power
                 | TokenKind::Mod
                 | TokenKind::Div
         ) {
@@ -101,11 +117,13 @@ impl<'a> Parser<'a> {
             // Handle constants (E and Pi) by replacing actual values
             TokenKind::E => {
                 self.advance()?;
-                Ok(ASTNode::Constant(std::f64::consts::E))
+                Ok(ASTNode::Constant(TokenKind::E))
+                // Ok(ASTNode::Constant(std::f64::consts::E))
             }
             TokenKind::Pi => {
                 self.advance()?;
-                Ok(ASTNode::Constant(std::f64::consts::PI))
+                Ok(ASTNode::Constant(TokenKind::Pi))
+                // Ok(ASTNode::Constant(std::f64::consts::PI))
             }
 
             // Handle functions (Sin, Cos, Tan, etc.)

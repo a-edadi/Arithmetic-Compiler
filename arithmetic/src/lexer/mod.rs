@@ -66,7 +66,6 @@ impl<'a> Lexer<'a> {
     }
 
     /// resets the lexer position so the input can be lexed again without the need to re initialize
-    #[allow(dead_code)]
     pub fn reset(&mut self) {
         self.current_pos = 0;
         self.line = 1;

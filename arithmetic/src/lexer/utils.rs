@@ -3,9 +3,9 @@ use super::CompilerError;
 use super::token::{Token, TokenKind};
 
 use crate::Lexer;
+
 /// lexes all tokens and returns a vector of theses tokens
 impl<'a> Lexer<'a> {
-    #[allow(dead_code)]
     pub fn lex_all_tokens(&mut self) -> Result<Vec<Token>, CompilerError> {
         let mut tokens_vec = Vec::new();
 
@@ -42,4 +42,9 @@ impl<'a> Lexer<'a> {
             }
         }
     }
+}
+
+pub fn lex_print_from_input(input: &str) {
+    let mut lexer = Lexer::new(input);
+    lexer.lex_print_tokens();
 }
