@@ -118,16 +118,13 @@ impl<'a> Parser<'a> {
                 Ok(ASTNode::Number(value))
             }
 
-            // Handle constants (E and Pi) by replacing actual values
-            TokenKind::E => {
+            TokenKind::Euler => {
                 self.advance()?;
-                Ok(ASTNode::Constant(TokenKind::E))
-                // Ok(ASTNode::Constant(std::f64::consts::E))
+                Ok(ASTNode::Constant(TokenKind::Euler))
             }
             TokenKind::Pi => {
                 self.advance()?;
                 Ok(ASTNode::Constant(TokenKind::Pi))
-                // Ok(ASTNode::Constant(std::f64::consts::PI))
             }
 
             // Handle functions (Sin, Cos, Tan, etc.)

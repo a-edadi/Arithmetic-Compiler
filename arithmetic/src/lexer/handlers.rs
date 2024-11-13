@@ -20,6 +20,9 @@ impl<'a> Lexer<'a> {
         c.is_ascii()
     }
 
+    pub fn is_mantis(c: &char) -> bool {
+        *c == 'E'
+    }
     /// Skip White spaces.
     pub fn skip_whitespace(&mut self) {
         while let Some(c) = self.current_char() {

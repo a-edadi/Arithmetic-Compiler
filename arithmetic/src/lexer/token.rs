@@ -38,9 +38,10 @@ pub enum TokenKind {
     Exp,
     Sqrt,
     Sqr,
+    Mantis,
 
     // Constants
-    E,
+    Euler,
     Pi,
 
     // Other
@@ -104,7 +105,8 @@ impl fmt::Display for TokenKind {
             TokenKind::Exp => write!(f, "Exp"),
             TokenKind::Sqrt => write!(f, "Sqrt"),
             TokenKind::Sqr => write!(f, "Sqr"),
-            TokenKind::E => write!(f, "e"),
+            TokenKind::Mantis => write!(f, "E"),
+            TokenKind::Euler => write!(f, "e"),
             TokenKind::Pi => write!(f, "π"),
             TokenKind::Func => write!(f, "Func"),
             TokenKind::Identifier(string) => write!(f, "Identifier({})", string),

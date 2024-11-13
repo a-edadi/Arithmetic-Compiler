@@ -15,7 +15,7 @@ fn ultimate_printer(input: &str) {
 }
 
 fn main() {
-    let input2 = "sin(x) + x";
+    let input2 = "sin(x) + e x - E+2";
 
     let input = "-(-sin(180 * 4*arctan(1) / 180) //term
     + log (exp(Y1))/log(e) {comment}+ sqrt(sqr(-_xY_2__z_))//term3
@@ -24,5 +24,7 @@ fn main() {
     }
     -2^2^3+X div 10-y1 mod 3.5 +2.31+0.69+130) ";
 
-    ultimate_printer(input2);
+    // ultimate_printer(input2);
+    ultimate_printer(input);
+    lex_print_from_input(input2);
 }

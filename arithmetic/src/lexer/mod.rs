@@ -137,6 +137,9 @@ impl<'a> Lexer<'a> {
             }
 
             TokenKind::Number(number)
+        } else if Self::is_mantis(&c) {
+            self.advance();
+            TokenKind::Mantis
         } else if Self::is_identifier_start(&c) {
             let identifier = self.handle_identifier()?;
             let identifier_lower = identifier.to_lowercase();
@@ -160,7 +163,7 @@ impl<'a> Lexer<'a> {
                     if self.set_variable_values {
                         TokenKind::Number(std::f64::consts::E)
                     } else {
-                        TokenKind::E
+                        TokenKind::Euler
                     }
                 }
                 "pi" => {

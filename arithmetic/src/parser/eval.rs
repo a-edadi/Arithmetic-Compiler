@@ -8,7 +8,7 @@ pub fn evaluate_ast(node: &ASTNode) -> Result<f64, String> {
 
         ASTNode::Identifier(id) => Err(format!("variable '{}'", id)),
 
-        ASTNode::Constant(TokenKind::E) => Ok(E),
+        ASTNode::Constant(TokenKind::Euler) => Ok(E),
         ASTNode::Constant(TokenKind::Pi) => Ok(PI),
 
         ASTNode::BinaryOp(left, op, right) => {
