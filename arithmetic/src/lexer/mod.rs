@@ -165,7 +165,7 @@ impl<'a> Lexer<'a> {
                 }
                 "pi" => {
                     if self.set_variable_values {
-                        TokenKind::Number(std::f64::consts::PI)
+                        TokenKind::Number(3.0)
                     } else {
                         TokenKind::Pi
                     }

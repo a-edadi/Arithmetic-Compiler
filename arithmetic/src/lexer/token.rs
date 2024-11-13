@@ -104,7 +104,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Exp => write!(f, "Exp"),
             TokenKind::Sqrt => write!(f, "Sqrt"),
             TokenKind::Sqr => write!(f, "Sqr"),
-            TokenKind::E => write!(f, "E"),
+            TokenKind::E => write!(f, "e"),
             TokenKind::Pi => write!(f, "π"),
             TokenKind::Func => write!(f, "Func"),
             TokenKind::Identifier(string) => write!(f, "Identifier({})", string),

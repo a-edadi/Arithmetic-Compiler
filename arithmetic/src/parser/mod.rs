@@ -1,12 +1,13 @@
 pub mod ast;
+pub mod eval;
 pub mod postfix;
 pub mod utils;
 
-use super::lexer::{
+use crate::errors::CompilerError;
+use crate::lexer::{
     token::{Token, TokenKind},
     Lexer,
 };
-use crate::errors::CompilerError;
 use ast::ASTNode;
 
 /// Parser

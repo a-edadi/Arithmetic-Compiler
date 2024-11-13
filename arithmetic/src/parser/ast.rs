@@ -1,6 +1,5 @@
 use super::TokenKind;
 
-/// AST Node definition
 #[derive(Debug)]
 pub enum ASTNode {
     Number(f64),                                     // A number node
