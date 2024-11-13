@@ -47,6 +47,13 @@ impl<'a> Lexer<'a> {
 
     /// Returns the next char without moving the position of the lexer
     pub fn peek_char(&self) -> Option<char> {
+        self.input.chars().nth(self.current_pos + 1)
+    }
+
+    /// Sometime handler advances and is moving on and calling peek char returns 2 chars ahead
+    /// like and input like this "1 mod" when the handle number is called we are currently at
+    /// the white space and when peek char gets called it returns m but it should return white space
+    pub fn peek_current_char(&self) -> Option<char> {
         self.input.chars().nth(self.current_pos)
     }
 
@@ -108,7 +115,7 @@ impl<'a> Lexer<'a> {
                 .map_err(|_| CompilerError::UnexpectedError(self.line, self.current_pos))?;
 
             // After parsing the number, check if the next character is part of an invalid identifier
-            if let Some(next_char) = self.peek_char() {
+            if let Some(next_char) = self.peek_current_char() {
                 if Self::is_identifier_start(&next_char) {
                     return Err(CompilerError::InvalidIdentifierStart(
                         self.line,
