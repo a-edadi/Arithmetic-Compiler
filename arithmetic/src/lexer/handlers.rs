@@ -1,5 +1,5 @@
-use super::CompilerError;
 use super::token::TokenKind;
+use super::CompilerError;
 use crate::Lexer;
 
 impl<'a> Lexer<'a> {
@@ -30,24 +30,6 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn lex_potential_double_char_operator(
-        &mut self,
-        expected: char,
-        one_char_kind: TokenKind,
-        double_char_kind: TokenKind,
-    ) -> TokenKind {
-        if let Some(next) = self.current_char() {
-            if next == expected {
-                self.advance();
-                double_char_kind
-            } else {
-                one_char_kind
-            }
-        } else {
-            one_char_kind
-        }
-    }
-
     /// Handle the punctuations operators and separators
     pub fn handle_punctuation(&mut self) -> Result<TokenKind, CompilerError> {
         let c = self.advance().unwrap();
@@ -55,10 +37,7 @@ impl<'a> Lexer<'a> {
             '+' => Ok(TokenKind::Plus),
             '-' => Ok(TokenKind::Minus),
             '*' => Ok(TokenKind::Multiply),
-            '%' => Ok(TokenKind::Remainder),
-            '/' => {
-                Ok(self.lex_potential_double_char_operator('/', TokenKind::Divide, TokenKind::Div))
-            }
+            '/' => Ok(TokenKind::Divide),
             '(' => Ok(TokenKind::LeftParen),
             ')' => Ok(TokenKind::RightParen),
             '^' => Ok(TokenKind::Power),
@@ -124,7 +103,9 @@ impl<'a> Lexer<'a> {
         if let Ok(number) = number_str.parse::<f64>() {
             Ok(number)
         } else {
-            Err(CompilerError::InvalidNumber(number_str, self.line, start_pos))
+            Err(CompilerError::InvalidNumber(
+                number_str, self.line, start_pos,
+            ))
         }
     }
 }

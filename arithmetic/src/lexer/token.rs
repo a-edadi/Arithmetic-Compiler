@@ -8,13 +8,13 @@ pub enum TokenKind {
     Number(f64),
 
     // Operators
-    Plus,      // Addition operator: +
-    Minus,     // Subtraction operator: -
-    Multiply,  // Multiplication operator: *
-    Divide,    // Division operator: /
-    Div,       // Integer division operator: //
-    Remainder, // Modulus operator: %
-    Power,     // Exponentiation operator: ^
+    Plus,     // Addition operator: +
+    Minus,    // Subtraction operator: -
+    Multiply, // Multiplication operator: *
+    Divide,   // Division operator: /
+    Div,      // Integer division operator: div
+    Mod,      // Modulus operator: mod
+    Power,    // Exponentiation operator: ^
 
     // Separators
     LeftParen,  // (
@@ -78,7 +78,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Multiply => write!(f, "Multiply"),
             TokenKind::Divide => write!(f, "Divide"),
             TokenKind::Div => write!(f, "Div"),
-            TokenKind::Remainder => write!(f, "Remainder"),
+            TokenKind::Mod => write!(f, "Modulus"),
             TokenKind::Power => write!(f, "Power"),
             TokenKind::LeftParen => write!(f, "LeftParen"),
             TokenKind::RightParen => write!(f, "RightParen"),

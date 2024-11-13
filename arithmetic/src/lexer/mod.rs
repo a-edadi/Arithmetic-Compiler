@@ -54,6 +54,10 @@ impl<'a> Lexer<'a> {
         self.current_pos
     }
 
+    pub fn get_line(&self) -> usize {
+        self.line
+    }
+
     /// resets the lexer position so the input can be lexed again without the need to re initialize
     #[allow(dead_code)]
     pub fn reset(&mut self) {
@@ -136,7 +140,7 @@ impl<'a> Lexer<'a> {
                 "e" => TokenKind::E,
                 "pi" => TokenKind::Pi,
                 "div" => TokenKind::Div,
-                "mod" => TokenKind::Remainder,
+                "mod" => TokenKind::Mod,
                 _ => TokenKind::Identifier(identifier),
             }
         } else if Self::is_ascii_start(&c) {

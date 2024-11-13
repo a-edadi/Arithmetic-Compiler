@@ -1,5 +1,5 @@
 use super::lexer::token::TokenKind;
-use std::fmt;
+use std::{fmt, usize};
 
 #[derive(Debug, PartialEq)]
 pub enum CompilerError {
@@ -8,7 +8,7 @@ pub enum CompilerError {
     UnexpectedError(usize, usize),
     InvalidIdentifierStart(usize, usize),
 
-    UnexpectedToken(TokenKind),
+    UnexpectedToken(TokenKind, usize, usize),
     MissingToken(String),
     DivisionByZero(usize),
     MissingOperator(Option<String>),
@@ -45,8 +45,12 @@ impl fmt::Display for CompilerError {
                     line, pos
                 )
             }
-            CompilerError::UnexpectedToken(kind) => {
-                write!(f, "Compile Error: Unexpected token '{}' detected", kind)
+            CompilerError::UnexpectedToken(kind, line, pos) => {
+                write!(
+                    f,
+                    "Compile Error: Unexpected token '{}' detected at line: {}, position: {}",
+                    kind, line, pos
+                )
             }
             CompilerError::MissingToken(token) => {
                 write!(f, "Compile Error: Expected token '{}' is missing", token)

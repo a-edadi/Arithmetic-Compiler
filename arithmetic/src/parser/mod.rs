@@ -42,17 +42,27 @@ impl<'a> Parser<'a> {
         Ok(node)
     }
 
-    // Parse a term (handles *, /, and exponentiation)
+    // Parse a term (handles *, /, div, mod, exponentiation)
     pub fn parse_term(&mut self) -> Result<ASTNode, CompilerError> {
         let mut node = self.parse_factor()?;
 
         while matches!(
             self.current_token.kind,
-            TokenKind::Multiply | TokenKind::Divide | TokenKind::Power
+            TokenKind::Multiply
+                | TokenKind::Divide
+                | TokenKind::Power
+                | TokenKind::Mod
+                | TokenKind::Div
         ) {
             let op = self.current_token.kind.clone();
             self.advance()?;
             let right_node = self.parse_factor()?;
+
+            // Handle division by zero
+            if let (TokenKind::Divide, ASTNode::Number(0.0)) = (&op, &right_node) {
+                return Err(CompilerError::DivisionByZero(self.lexer.get_position()));
+            }
+
             node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node));
         }
 
@@ -63,26 +73,32 @@ impl<'a> Parser<'a> {
         match &self.current_token.kind {
             // Handle unary minus (negation)
             TokenKind::Minus => {
-                self.advance()?; // Consume the minus
-                let operand = self.parse_factor()?; // Parse the next factor (it can be a number, parentheses, etc.)
-                Ok(ASTNode::UnaryOp(TokenKind::Minus, Box::new(operand))) // Return a unary negation node
+                self.advance()?;
+                let operand = self.parse_factor()?;
+                Ok(ASTNode::UnaryOp(TokenKind::Minus, Box::new(operand)))
             }
 
-            // Handle unary plus (optional, but for completeness)
+            // Handle unary plus
             TokenKind::Plus => {
-                self.advance()?; // Consume the plus
-                let operand = self.parse_factor()?; // Parse the next factor
-                Ok(operand) // Just return the operand, as unary plus does not change the value
+                self.advance()?;
+                let operand = self.parse_factor()?;
+                Ok(operand)
             }
 
             // Number literal
             TokenKind::Number(n) => {
                 let value = *n;
                 self.advance()?;
+                // Check if the next token is also a number without an operator between them
+                if let TokenKind::Number(_) = self.current_token.kind {
+                    return Err(CompilerError::MissingOperator(Some(
+                        "2 consecutive numbers were passed without an operator".to_string(),
+                    )));
+                }
                 Ok(ASTNode::Number(value))
             }
 
-            // Handle constants (E and Pi)
+            // Handle constants (E and Pi) by replacing actual values
             TokenKind::E => {
                 self.advance()?;
                 Ok(ASTNode::Constant(std::f64::consts::E))
@@ -112,6 +128,8 @@ impl<'a> Parser<'a> {
                 if self.current_token.kind != TokenKind::LeftParen {
                     return Err(CompilerError::UnexpectedToken(
                         self.current_token.kind.clone(),
+                        self.lexer.get_position(),
+                        self.lexer.get_line(),
                     ));
                 }
                 self.advance()?; // Skip '('
@@ -138,6 +156,8 @@ impl<'a> Parser<'a> {
                     _ => {
                         return Err(CompilerError::UnexpectedToken(
                             self.current_token.kind.clone(),
+                            self.lexer.get_position(),
+                            self.lexer.get_line(),
                         ))
                     }
                 };
@@ -148,14 +168,14 @@ impl<'a> Parser<'a> {
                 ))
             }
 
-            // Handle variables or identifiers
+            // Handle identifiers
             TokenKind::Identifier(id) => {
                 let identifier = id.clone();
                 self.advance()?;
                 Ok(ASTNode::Identifier(identifier))
             }
 
-            // Parentheses for grouping expressions
+            // Parentheses
             TokenKind::LeftParen => {
                 self.advance()?;
                 let node = self.parse_expression()?;
@@ -165,10 +185,13 @@ impl<'a> Parser<'a> {
                 self.advance()?; // Skip ')'
                 Ok(node)
             }
+            TokenKind::RightParen => Err(CompilerError::MissingToken("(".to_string())),
 
             // Unexpected token
             _ => Err(CompilerError::UnexpectedToken(
                 self.current_token.kind.clone(),
+                self.lexer.get_position(),
+                self.lexer.get_line(),
             )),
         }
     }
