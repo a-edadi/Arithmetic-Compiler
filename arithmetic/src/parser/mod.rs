@@ -1,12 +1,12 @@
 pub mod ast;
 pub mod postfix;
 pub mod utils;
-use crate::errors::CompilerError;
 
 use super::lexer::{
     token::{Token, TokenKind},
     Lexer,
 };
+use crate::errors::CompilerError;
 use ast::ASTNode;
 
 /// Parser
@@ -48,31 +48,18 @@ impl<'a> Parser<'a> {
 
         Ok(node)
     }
-
-    // Parse a term (handles *, /, div, mod, exponentiation)
     pub fn parse_term(&mut self) -> Result<ASTNode, CompilerError> {
-        let mut node = self.parse_factor()?;
+        // Start with parsing the first factor
+        let mut node = self.parse_exponentiation()?;
 
-        while matches!(self.current_token.kind, TokenKind::Power) {
-            let op = self.current_token.kind.clone();
-            self.advance()?;
-            let right_node = self.parse_factor()?;
-
-            // Since exponentiation is right-associative, we process right operand first
-            node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node));
-        }
-
+        // Parse multiplication, division, mod, and div, which are left-associative
         while matches!(
             self.current_token.kind,
-            TokenKind::Multiply
-                | TokenKind::Divide
-                // | TokenKind::Power
-                | TokenKind::Mod
-                | TokenKind::Div
+            TokenKind::Multiply | TokenKind::Divide | TokenKind::Mod | TokenKind::Div
         ) {
             let op = self.current_token.kind.clone();
             self.advance()?;
-            let right_node = self.parse_factor()?;
+            let right_node = self.parse_exponentiation()?;
 
             // Handle division by zero
             if let (TokenKind::Divide, ASTNode::Number(0.0)) = (&op, &right_node) {
@@ -85,6 +72,22 @@ impl<'a> Parser<'a> {
         Ok(node)
     }
 
+    // Parse an exponentiation expression with right-associativity
+    fn parse_exponentiation(&mut self) -> Result<ASTNode, CompilerError> {
+        // Start by parsing the left factor
+        let mut node = self.parse_factor()?;
+
+        // Handle exponentiation as right-associative
+        if self.current_token.kind == TokenKind::Power {
+            let op = self.current_token.kind.clone();
+            self.advance()?;
+            let right_node = self.parse_exponentiation()?; // Recur to handle right-associativity
+
+            node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node));
+        }
+
+        Ok(node)
+    }
     pub fn parse_factor(&mut self) -> Result<ASTNode, CompilerError> {
         match &self.current_token.kind {
             // Handle unary minus (negation)

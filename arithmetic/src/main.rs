@@ -3,7 +3,7 @@ mod lexer;
 mod parser;
 
 use lexer::{utils::lex_print_from_input, Lexer};
-use parser::utils::{print_ast, print_postfix};
+use parser::utils::{print_ast, print_ast_with_values, print_postfix};
 
 fn ultimate_printer(input: &str) {
     lex_print_from_input(input);
@@ -21,7 +21,7 @@ fn main() {
     comment
     }
     -2^2^3+X div 10-y1 mod 3+2.31+0.69+1.3*E+2) ";
-    ultimate_printer(input);
     ultimate_printer(input2);
-
+    println!("---------------------------------------------");
+    print_ast_with_values(input)
 }

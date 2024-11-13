@@ -4,6 +4,7 @@ pub mod token;
 pub mod utils;
 
 use crate::errors::CompilerError;
+use std::collections::HashMap;
 use text::TextSpan;
 use token::{Token, TokenKind};
 
@@ -11,7 +12,8 @@ pub struct Lexer<'a> {
     input: &'a str,
     current_pos: usize,
     line: usize,
-    // variables: HashMap<String, f64>,
+    set_variable_values: bool,
+    variables: HashMap<String, f64>,
 }
 
 impl<'a> Lexer<'a> {
@@ -21,7 +23,18 @@ impl<'a> Lexer<'a> {
             input,
             current_pos: 0,
             line: 1,
-            // variables: HashMap::new(),
+            variables: HashMap::new(),
+            set_variable_values: false,
+        }
+    }
+
+    pub fn with_set_values(input: &'a str, set_values: bool) -> Self {
+        Self {
+            input,
+            current_pos: 0,
+            line: 1,
+            variables: HashMap::new(),
+            set_variable_values: set_values,
         }
     }
 
@@ -143,11 +156,30 @@ impl<'a> Lexer<'a> {
                 "exp" => TokenKind::Exp,
                 "sqrt" => TokenKind::Sqrt,
                 "sqr" => TokenKind::Sqr,
-                "e" => TokenKind::E,
-                "pi" => TokenKind::Pi,
+                "e" => {
+                    if self.set_variable_values {
+                        TokenKind::Number(std::f64::consts::E)
+                    } else {
+                        TokenKind::E
+                    }
+                }
+                "pi" => {
+                    if self.set_variable_values {
+                        TokenKind::Number(std::f64::consts::PI)
+                    } else {
+                        TokenKind::Pi
+                    }
+                }
                 "div" => TokenKind::Div,
                 "mod" => TokenKind::Mod,
-                _ => TokenKind::Identifier(identifier),
+                _ => {
+                    if self.set_variable_values {
+                        let value = self.prompt_for_variable_value(&identifier_lower);
+                        TokenKind::Number(value)
+                    } else {
+                        TokenKind::Identifier(identifier)
+                    }
+                }
             }
         } else if Self::is_ascii_start(&c) {
             self.handle_punctuation()?

@@ -11,6 +11,22 @@ pub fn print_ast(input: &str) {
             return;
         }
     };
+    println!("Ast Tree:");
+    print_ast_tree(&ast, "".to_string(), false);
+}
+
+pub fn print_ast_with_values(input: &str) {
+    let lexer = Lexer::with_set_values(input, true);
+
+    let mut parser = Parser::new(lexer).unwrap();
+    let ast = match parser.parse_expression() {
+        Ok(ast) => ast,
+        Err(error) => {
+            println!("{}", error);
+            return;
+        }
+    };
+    println!("Ast Tree:");
     print_ast_tree(&ast, "".to_string(), false);
 }
 

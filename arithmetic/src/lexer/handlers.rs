@@ -1,6 +1,7 @@
 use super::token::TokenKind;
 use super::CompilerError;
 use crate::Lexer;
+use std::io::{self, Write};
 
 impl<'a> Lexer<'a> {
     pub fn is_number_start(c: &char) -> bool {
@@ -131,6 +132,33 @@ impl<'a> Lexer<'a> {
                 break;
             }
             self.advance();
+        }
+    }
+
+    /// Helper method to prompt user for a variable value and store it in `variables`
+    pub fn prompt_for_variable_value(&mut self, var_name: &str) -> f64 {
+        // Check if the variable has already been assigned a value
+        if let Some(&value) = self.variables.get(var_name) {
+            return value; // Return existing value
+        }
+
+        // Prompt the user for input if variable hasn't been set
+        println!("Enter value for variable '{}':", var_name);
+        loop {
+            let mut input = String::new();
+            print!("> ");
+            io::stdout().flush().unwrap(); // Display the prompt immediately
+            io::stdin().read_line(&mut input).unwrap();
+
+            match input.trim().parse::<f64>() {
+                Ok(value) => {
+                    self.variables.insert(var_name.to_string(), value); // Store in HashMap
+                    return value;
+                }
+                Err(_) => {
+                    println!("Invalid input. Please enter a valid number.");
+                }
+            }
         }
     }
 }
