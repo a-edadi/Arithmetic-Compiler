@@ -2,14 +2,12 @@ use super::{Lexer, Num};
 use std::io::{self, Write};
 
 impl<'a> Lexer<'a> {
-    // This function is a simple getter that either fetches from the variables map or prompts the user
     pub fn get_variable_value(&mut self, var_name: &str) -> Num {
-        // If the variable exists in the map, return its value
+        // If the variable exists -> return its value if not prompt to get the value
         if let Some(value) = self.variables.get(var_name) {
             return value.clone();
         }
 
-        // Otherwise, prompt the user to input a value for the variable
         self.prompt_terminal_for_variable_value(var_name)
     }
 

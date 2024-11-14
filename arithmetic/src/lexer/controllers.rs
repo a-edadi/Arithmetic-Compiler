@@ -26,17 +26,17 @@ impl<'a> Lexer<'a> {
         self.input.chars().nth(self.current_pos + 1)
     }
 
+    /// resets the lexer position so the input can be lexed again without the need to re initialize
+    pub fn reset(&mut self) {
+        self.current_pos = 0;
+        self.line = 1;
+    }
+
     pub fn get_position(&self) -> usize {
         self.current_pos
     }
 
     pub fn get_line(&self) -> usize {
         self.line
-    }
-
-    /// resets the lexer position so the input can be lexed again without the need to re initialize
-    pub fn reset(&mut self) {
-        self.current_pos = 0;
-        self.line = 1;
     }
 }

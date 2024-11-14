@@ -70,6 +70,7 @@ impl<'a> Lexer<'a> {
 
         // Matching
         let kind = if Self::is_number_start(&c) {
+            // Call handle_number, which now returns either a Mantiss or a Number token kind
             let number_kind = self
                 .handle_number()
                 .map_err(|_| CompilerError::UnexpectedError(self.line, self.current_pos))?;
@@ -77,6 +78,7 @@ impl<'a> Lexer<'a> {
             // After parsing the number, check if the next character is part of an invalid identifier
             if let Some(next_char) = self.current_char() {
                 if Self::is_identifier_start(&next_char) {
+                    // Raise an error for identifiers starting with a number
                     return Err(CompilerError::InvalidIdentifierStart(
                         self.line,
                         self.current_pos,
@@ -84,7 +86,8 @@ impl<'a> Lexer<'a> {
                 }
             }
 
-            TokenKind::Number(number_kind)
+            // Directly use the returned `number_kind` (Mantiss or Number)
+            number_kind
         } else if Self::is_identifier_start(&c) {
             let identifier = self.handle_identifier()?;
             let identifier_lower = identifier.to_lowercase();

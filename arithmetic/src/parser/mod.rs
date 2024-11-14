@@ -124,6 +124,12 @@ impl<'a> Parser<'a> {
                 Ok(ASTNode::Number(value)) // Adapt ASTNode::Number to accept Num directly
             }
 
+            TokenKind::Mantiss(mantiss_str) => {
+                let mantiss_value = mantiss_str.clone();
+                self.advance()?;
+                Ok(ASTNode::Mantiss(mantiss_value))
+            }
+
             TokenKind::Euler => {
                 self.advance()?;
                 Ok(ASTNode::Constant(TokenKind::Euler))

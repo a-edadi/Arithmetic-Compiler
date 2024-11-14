@@ -16,6 +16,15 @@ pub fn print_ast_tree(node: &ASTNode, prefix: String, is_left: bool) {
                 number_str
             );
         }
+        // Printing a mantissa node
+        ASTNode::Mantiss(mantiss_str) => {
+            println!(
+                "{}{}{}",
+                prefix,
+                if is_left { "├── " } else { "└── " },
+                mantiss_str
+            );
+        }
 
         // Printing an identifier node
         ASTNode::Identifier(id) => {

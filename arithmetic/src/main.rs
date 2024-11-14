@@ -16,23 +16,26 @@ fn ultimate_printer(input: &str) {
 
 fn main() {
     #[allow(unused_variables)]
-    let input2 = "1 + 1 - ! 2 + 3";
+    let input2 = "1";
 
-    let input = "-(-sin(180 * 4*arctan(1) / 180) //term
+    let input = "-(-sin(x * 4*arctan(1) / 180) //term
     + log (exp(Y1))/log(e) {comment}+ sqrt(sqr(-_xY_2__z_))//term3
     {
     comment
     }
-    -2^2^3+X div 10-y1 mod 3 +2.31+0.69+130) ";
-
+    -2^2^3+X div 10-y1 mod 3.1 +2.31+0.69+1.3E+2) ";
+    //
+    // ultimate_printer(input2);
     ultimate_printer(input2);
-    let mut lexer = Lexer::new(input2, false);
-    match lexer.lex_to_token_string() {
-        Ok(tokens_string) => {
-            println!("Tokens:\n{}", tokens_string); // Output the tokens string
-        }
-        Err(e) => {
-            eprintln!("{}", e);
-        }
-    }
+    eval_print::print_evaluation(input);
+
+    // let mut lexer = Lexer::new(input, true);
+    // match lexer.lex_to_token_string() {
+    //     Ok(tokens_string) => {
+    //         println!("Tokens:\n{}", tokens_string); // Output the tokens string
+    //     }
+    //     Err(e) => {
+    //         eprintln!("{}", e);
+    //     }
+    // }
 }

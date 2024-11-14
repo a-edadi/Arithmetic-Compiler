@@ -12,6 +12,13 @@ pub enum CompilerError {
     MissingToken(String),
     DivisionByZero(usize),
     MissingOperator(Option<String>),
+    // Evaluation errors
+    EvalDivisionByZero,
+    IntegerOperatorWithFloatOperands,
+    UnsupportedBinaryOperator(String),
+    UnsupportedUnaryOperator(String),
+    UnsupportedFunction(String),
+    TryEvalUnreachable(String),
 }
 // Implement Display for CompileError to provide custom error messages
 impl fmt::Display for CompilerError {
@@ -64,6 +71,31 @@ impl fmt::Display for CompilerError {
             }
             CompilerError::MissingOperator(string) => {
                 write!(f, "Compile Error: Missing Operator. {:?}", string)
+            }
+            CompilerError::EvalDivisionByZero => {
+                write!(f, "Can not evaluate Division by zero")
+            }
+            CompilerError::IntegerOperatorWithFloatOperands => {
+                write!(
+                    f,
+                    "Integer operator (Div or Mod) only supports integer operands"
+                )
+            }
+            CompilerError::UnsupportedBinaryOperator(op) => {
+                write!(f, "Unsupported binary operator: {}", op)
+            }
+            CompilerError::UnsupportedUnaryOperator(op) => {
+                write!(f, "Unsupported Unary operator: {}", op)
+            }
+            CompilerError::UnsupportedFunction(func) => {
+                write!(f, "Unsupported Function: {}", func)
+            }
+            CompilerError::TryEvalUnreachable(s) => {
+                write!(
+                    f,
+                    "Tried to eval without values! You need to Provide values for evaluation: {}",
+                    s
+                )
             }
         }
     }

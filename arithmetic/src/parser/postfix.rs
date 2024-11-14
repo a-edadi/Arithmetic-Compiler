@@ -14,6 +14,11 @@ pub fn ast_to_postfix(node: &ASTNode) -> String {
             format!("{} ", number_str)
         }
 
+        // Handle a mantissa node
+        ASTNode::Mantiss(mantiss_str) => {
+            format!("{} ", mantiss_str)
+        }
+
         // Handle an identifier node
         ASTNode::Identifier(id) => format!("{} ", id),
 

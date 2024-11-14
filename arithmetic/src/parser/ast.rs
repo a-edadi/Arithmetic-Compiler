@@ -5,6 +5,7 @@ use super::TokenKind;
 #[derive(Debug)]
 pub enum ASTNode {
     Number(Num),                                     // A number node
+    Mantiss(String),                                 // Mantissa representation as a string
     Identifier(String),                              // A variable or function name
     BinaryOp(Box<ASTNode>, TokenKind, Box<ASTNode>), // A binary operation node using TokenKind
     UnaryOp(TokenKind, Box<ASTNode>),                // A unary operation node

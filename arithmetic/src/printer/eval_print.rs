@@ -11,6 +11,13 @@ pub fn print_evaluation(input: &str) {
             return;
         }
     };
-    let r = evaluate_ast(&ast);
-    println!("Final result is: {:?}", r);
+
+    match evaluate_ast(&ast) {
+        Ok(r) => {
+            println!("Final result is: {:?}", r);
+        }
+        Err(e) => {
+            println!("{}", e)
+        }
+    }
 }

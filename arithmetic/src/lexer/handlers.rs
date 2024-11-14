@@ -78,18 +78,17 @@ impl<'a> Lexer<'a> {
 
         Ok(identifier)
     }
-
-    pub fn handle_number(&mut self) -> Result<Num, CompilerError> {
+    pub fn handle_number(&mut self) -> Result<TokenKind, CompilerError> {
         let start_pos = self.current_pos;
         let mut number_str = String::new();
         let mut has_dot = false;
 
+        // Parse the mantissa part (base part of the number)
         while let Some(c) = self.current_char() {
             if c.is_ascii_digit() {
                 number_str.push(c);
                 self.advance();
             } else if c == '.' && !has_dot {
-                // Allow only one decimal point
                 number_str.push(c);
                 has_dot = true;
                 self.advance();
@@ -98,23 +97,90 @@ impl<'a> Lexer<'a> {
             }
         }
 
-        // Parse as Float if it has a decimal point, else as Integer
-        if has_dot {
-            if let Ok(float_num) = number_str.parse::<f64>() {
-                Ok(Num::Float(float_num))
-            } else {
-                Err(CompilerError::InvalidNumber(
-                    number_str, self.line, start_pos,
-                ))
+        // Check for scientific notation (e.g., "E+2")
+        if let Some('E') = self.current_char() {
+            number_str.push('E'); // Add E to the number string
+            self.advance(); // Move past 'E'
+
+            // Optional sign for the exponent part
+            if let Some(sign) = self.current_char() {
+                if sign == '+' || sign == '-' {
+                    number_str.push(sign);
+                    self.advance();
+                }
             }
-        } else {
-            if let Ok(int_num) = number_str.parse::<i64>() {
-                Ok(Num::Integer(int_num))
-            } else {
-                Err(CompilerError::InvalidNumber(
-                    number_str, self.line, start_pos,
-                ))
+
+            // Parse the exponent digits
+            while let Some(c) = self.current_char() {
+                if c.is_ascii_digit() {
+                    number_str.push(c);
+                    self.advance();
+                } else {
+                    break;
+                }
             }
         }
+
+        // Return based on `set_values`
+        if self.set_variable_values {
+            // Attempt to parse the full number as a float or integer
+            if has_dot || number_str.contains('E') {
+                match number_str.parse::<f64>() {
+                    Ok(float_num) => Ok(TokenKind::Number(Num::Float(float_num))),
+                    Err(_) => Err(CompilerError::InvalidNumber(
+                        number_str, self.line, start_pos,
+                    )),
+                }
+            } else {
+                match number_str.parse::<i64>() {
+                    Ok(int_num) => Ok(TokenKind::Number(Num::Integer(int_num))),
+                    Err(_) => Err(CompilerError::InvalidNumber(
+                        number_str, self.line, start_pos,
+                    )),
+                }
+            }
+        } else {
+            // If `set_values` is false, store as a string mantissa
+            Ok(TokenKind::Mantiss(number_str))
+        }
     }
+
+    // pub fn handle_number(&mut self) -> Result<Num, CompilerError> {
+    //     let start_pos = self.current_pos;
+    //     let mut number_str = String::new();
+    //     let mut has_dot = false;
+
+    //     while let Some(c) = self.current_char() {
+    //         if c.is_ascii_digit() {
+    //             number_str.push(c);
+    //             self.advance();
+    //         } else if c == '.' && !has_dot {
+    //             // Allow only one decimal point
+    //             number_str.push(c);
+    //             has_dot = true;
+    //             self.advance();
+    //         } else {
+    //             break;
+    //         }
+    //     }
+
+    //     // Parse as Float if it has a decimal point, else as Integer
+    //     if has_dot {
+    //         if let Ok(float_num) = number_str.parse::<f64>() {
+    //             Ok(Num::Float(float_num))
+    //         } else {
+    //             Err(CompilerError::InvalidNumber(
+    //                 number_str, self.line, start_pos,
+    //             ))
+    //         }
+    //     } else {
+    //         if let Ok(int_num) = number_str.parse::<i64>() {
+    //             Ok(Num::Integer(int_num))
+    //         } else {
+    //             Err(CompilerError::InvalidNumber(
+    //                 number_str, self.line, start_pos,
+    //             ))
+    //         }
+    //     }
+    // }
 }

@@ -1,20 +1,15 @@
-use crate::lexer::token::Num;
-
 use super::{ASTNode, TokenKind};
-use std::f64::consts::{E, PI};
+use crate::errors::CompilerError;
+use crate::lexer::token::Num;
+use std::f64::consts::PI;
 
 /// Evaluates an AST and returns a single floating-point result
-pub fn evaluate_ast(node: &ASTNode) -> Result<f64, String> {
+pub fn evaluate_ast(node: &ASTNode) -> Result<f64, CompilerError> {
     match node {
         ASTNode::Number(n) => match n {
             Num::Integer(i) => Ok(*i as f64),
             Num::Float(f) => Ok(*f),
         },
-
-        ASTNode::Identifier(id) => Err(format!("variable '{}'", id)),
-
-        ASTNode::Constant(TokenKind::Euler) => Ok(E),
-        ASTNode::Constant(TokenKind::Pi) => Ok(PI),
 
         ASTNode::BinaryOp(left, op, right) => {
             let left_val = evaluate_ast(left)?; // Recursively evaluate left operand
@@ -25,7 +20,7 @@ pub fn evaluate_ast(node: &ASTNode) -> Result<f64, String> {
                 TokenKind::Multiply => Ok(left_val * right_val),
                 TokenKind::Divide => {
                     if right_val == 0.0 {
-                        Err("Division by zero".to_string())
+                        Err(CompilerError::EvalDivisionByZero)
                     } else {
                         Ok(left_val / right_val)
                     }
@@ -33,7 +28,7 @@ pub fn evaluate_ast(node: &ASTNode) -> Result<f64, String> {
                 TokenKind::Mod => {
                     // Ensure both left and right values are integers for modulus
                     if left_val.fract() != 0.0 || right_val.fract() != 0.0 {
-                        Err("Mod operator only supports integer operands".to_string())
+                        Err(CompilerError::IntegerOperatorWithFloatOperands)
                     } else {
                         Ok(left_val % right_val)
                     }
@@ -41,15 +36,15 @@ pub fn evaluate_ast(node: &ASTNode) -> Result<f64, String> {
                 TokenKind::Div => {
                     // Ensure both left and right values are integers for integer division
                     if left_val.fract() != 0.0 || right_val.fract() != 0.0 {
-                        Err("Div operator only supports integer operands".to_string())
+                        Err(CompilerError::IntegerOperatorWithFloatOperands)
                     } else if right_val == 0.0 {
-                        Err("Division by zero".to_string())
+                        Err(CompilerError::EvalDivisionByZero)
                     } else {
                         Ok((left_val / right_val).floor())
                     }
                 }
                 TokenKind::Power => Ok(left_val.powf(right_val)), // Exponentiation
-                _ => Err(format!("Unsupported binary operator: {:?}", op)),
+                _ => Err(CompilerError::UnsupportedBinaryOperator(op.to_string())),
             }
         }
 
@@ -58,7 +53,7 @@ pub fn evaluate_ast(node: &ASTNode) -> Result<f64, String> {
             match op {
                 TokenKind::Minus => Ok(-expr_val),
                 TokenKind::Plus => Ok(expr_val),
-                _ => Err(format!("Unsupported unary operator: {:?}", op)),
+                _ => Err(CompilerError::UnsupportedUnaryOperator(op.to_string())),
             }
         }
 
@@ -81,10 +76,15 @@ pub fn evaluate_ast(node: &ASTNode) -> Result<f64, String> {
                 "exp" => Ok(arg_val.exp()),
                 "sqrt" => Ok(arg_val.sqrt()),
                 "sqr" => Ok(arg_val * arg_val),
-                _ => Err(format!("Unsupported function: {}", func)),
+                _ => Err(CompilerError::UnsupportedFunction(func.to_string())),
             }
         }
 
-        ASTNode::Constant(_) => unreachable!("Unhandled constant case"),
+        // unreachable
+        ASTNode::Constant(_) => Err(CompilerError::TryEvalUnreachable("Constants".to_string())),
+        ASTNode::Mantiss(_) => Err(CompilerError::TryEvalUnreachable("Mantiss".to_string())),
+        ASTNode::Identifier(id) => Err(CompilerError::TryEvalUnreachable(id.to_string())),
+        // ASTNode::Constant(TokenKind::Euler) => Err(format!("Value not found")),
+        // ASTNode::Constant(TokenKind::Pi) => Err(format!("Value not found")),
     }
 }

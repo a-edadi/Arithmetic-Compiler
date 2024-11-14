@@ -12,6 +12,7 @@ pub enum Num {
 pub enum TokenKind {
     // Literals
     Number(Num),
+    Mantiss(String),
 
     // Identifier
     Func,
@@ -51,9 +52,6 @@ pub enum TokenKind {
 
     // Other
     Eof, // End of file/input marker
-
-         // Scientific Notations
-         // Mantis,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -124,7 +122,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Exp => write!(f, "Exp"),
             TokenKind::Sqrt => write!(f, "Sqrt"),
             TokenKind::Sqr => write!(f, "Sqr"),
-            // TokenKind::Mantis => write!(f, "E"),
+            TokenKind::Mantiss(num_str) => write!(f, "{}", num_str),
             TokenKind::Euler => write!(f, "e"),
             TokenKind::Pi => write!(f, "π"),
             TokenKind::Func => write!(f, "Func"),
