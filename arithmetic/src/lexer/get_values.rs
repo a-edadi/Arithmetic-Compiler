@@ -2,6 +2,8 @@ use super::{Lexer, Num};
 use std::io::{self, Write};
 
 impl<'a> Lexer<'a> {
+    /// Gets the values from where ever
+    /// TODO: Make it generic
     pub fn get_variable_value(&mut self, var_name: &str) -> Num {
         // If the variable exists -> return its value if not prompt to get the value
         if let Some(value) = self.variables.get(var_name) {

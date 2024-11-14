@@ -31,6 +31,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    /// The core lexer  logic
     pub fn get_next_token(&mut self) -> Result<Token, CompilerError> {
         self.skip_whitespace();
 
@@ -43,6 +44,7 @@ impl<'a> Lexer<'a> {
             ));
         }
 
+        // fetch teh current char
         let c = match self.current_char() {
             Some(ch) => ch,
             None => {
