@@ -1,13 +1,12 @@
-use crate::lexer::text::TextSpan;
+use crate::lexer::span::TextSpan;
 use std::fmt;
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq)]
-
 pub enum Num {
     Integer(i64),
     Float(f64),
 }
+
 #[derive(Debug, Clone, PartialEq)]
 
 pub enum TokenKind {
@@ -24,36 +23,37 @@ pub enum TokenKind {
     Multiply, // Multiplication operator: *
     Divide,   // Division operator: /
     Div,      // Integer division operator: div
-    Mod,      // Modulus operator: mod
+    Mod,      // Modulo operator: mod
     Power,    // Exponentiation operator: ^
 
     // Separators
     LeftParen,  // (
     RightParen, // )
 
-    // Functions
-    Sin,
-    Cos,
-    Tan,
-    Cotan,
-    ArcSin,
-    ArcCos,
-    ArcTan,
-    ArcCotan,
-    Ln,
-    Log,
-    Exp,
-    Sqrt,
-    Sqr,
+    // Mathematical functions
+    Sin,      // Sine function: sin
+    Cos,      // Cosine function: cos
+    Tan,      // Tangent function: tan
+    Cotan,    // Cotangent function: cotan
+    ArcSin,   // Inverse sine function: arcsin
+    ArcCos,   // Inverse cosine function: arccos
+    ArcTan,   // Inverse tangent function: arctan
+    ArcCotan, // Inverse cotangent function: arccotan
+    Ln,       // Natural logarithm function: ln
+    Log,      // Base-10 logarithm function: log
+    Exp,      // Exponential function: exp(x) = e^x
+    Sqrt,     // Square root function: sqrt(x) = √x
+    Sqr,      // Squaring function: sqr(x) = x^2
 
     // Constants
-    Euler,
-    Pi,
+    Euler, // Euler's number: e
+    Pi,    // Pi: π
 
     // Other
-    Eof,
-    // Scientific Notations
-    // Mantis,
+    Eof, // End of file/input marker
+
+         // Scientific Notations
+         // Mantis,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -68,6 +68,8 @@ impl Token {
     }
 }
 
+// Handling the Display for Token, TokenKind and Num
+
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -78,10 +80,19 @@ impl fmt::Display for Token {
     }
 }
 
+impl fmt::Display for Num {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Num::Integer(i) => write!(f, "Integer({})", i),
+            Num::Float(fl) => write!(f, "Float({})", fl),
+        }
+    }
+}
+
 impl fmt::Display for TokenKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            TokenKind::Number(num) => write!(f, "Number({:?})", num),
+            TokenKind::Number(num) => write!(f, "Number({})", num),
             TokenKind::Plus => write!(f, "+"),
             // TokenKind::Plus => write!(f, "Plus"),
             TokenKind::Minus => write!(f, "-"),

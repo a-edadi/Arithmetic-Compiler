@@ -23,22 +23,32 @@ impl<'a> Lexer<'a> {
 
         Ok(tokens_vec)
     }
-}
 
-/// Terminal Printing Utility
-impl<'a> Lexer<'a> {
-    #[allow(dead_code)]
-    pub fn lex_print_tokens(&mut self) {
+    /// Lexes all tokens and returns a formatted string representation of the input
+    pub fn lex_to_token_string(&mut self) -> Result<String, CompilerError> {
         let tokens_result = self.lex_all_tokens();
 
         match tokens_result {
             Ok(tokens) => {
+                let mut result = String::new();
                 for token in tokens {
-                    println!("{}", token);
+                    result.push_str(&format!("{}\n", token));
                 }
+                Ok(result)
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    #[allow(dead_code)]
+    /// Built in Terminal Printing Utility
+    pub fn lex_print_tokens(&mut self) {
+        match self.lex_to_token_string() {
+            Ok(tokens_string) => {
+                println!("Tokens:\n{}", tokens_string);
             }
             Err(e) => {
-                eprintln!("Error: {}", e);
+                eprintln!("{}", e);
             }
         }
     }

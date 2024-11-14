@@ -1,11 +1,14 @@
+pub mod comments;
+pub mod controllers;
+pub mod get_values;
 pub mod handlers;
-pub mod text;
+pub mod span;
 pub mod token;
 pub mod utils;
 
 use crate::errors::CompilerError;
+use span::TextSpan;
 use std::collections::HashMap;
-use text::TextSpan;
 use token::{Num, Token, TokenKind};
 
 pub struct Lexer<'a> {
@@ -17,18 +20,7 @@ pub struct Lexer<'a> {
 }
 
 impl<'a> Lexer<'a> {
-    /// Used to initialize a new lexer
-    pub fn new(input: &'a str) -> Self {
-        Self {
-            input,
-            current_pos: 0,
-            line: 1,
-            variables: HashMap::new(),
-            set_variable_values: false,
-        }
-    }
-
-    pub fn with_set_values(input: &'a str, set_values: bool) -> Self {
+    pub fn new(input: &'a str, set_values: bool) -> Self {
         Self {
             input,
             current_pos: 0,
@@ -38,50 +30,11 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    /// Returns Current Char
-    fn current_char(&self) -> Option<char> {
-        self.input.chars().nth(self.current_pos)
-    }
-
-    /// Advances to the next position also returns the current char before moving the position
-    pub fn advance(&mut self) -> Option<char> {
-        if self.current_pos >= self.input.len() {
-            return None;
-        }
-        let c = self.current_char();
-        self.current_pos += 1;
-
-        if c == Some('\n') {
-            self.line += 1;
-        }
-
-        c
-    }
-
-    /// Returns the next char without moving the position of the lexer
-    pub fn peek_char(&self) -> Option<char> {
-        self.input.chars().nth(self.current_pos + 1)
-    }
-
-    pub fn get_position(&self) -> usize {
-        self.current_pos
-    }
-
-    pub fn get_line(&self) -> usize {
-        self.line
-    }
-
-    /// resets the lexer position so the input can be lexed again without the need to re initialize
-    pub fn reset(&mut self) {
-        self.current_pos = 0;
-        self.line = 1;
-    }
-
     pub fn get_next_token(&mut self) -> Result<Token, CompilerError> {
         self.skip_whitespace();
 
+        // Ensure that the lexer is in bound
         if self.current_pos >= self.input.len() {
-            // Handle end-of-file case
             let eof_char: char = '\0';
             return Ok(Token::new(
                 TokenKind::Eof,
@@ -99,7 +52,8 @@ impl<'a> Lexer<'a> {
                 ))
             }
         };
-        // used for span start and end
+
+        // used for defining span start and end
         let start = self.current_pos;
 
         // Check for line comments
@@ -114,6 +68,7 @@ impl<'a> Lexer<'a> {
             return self.get_next_token();
         }
 
+        // Matching
         let kind = if Self::is_number_start(&c) {
             let number_kind = self
                 .handle_number()
@@ -149,6 +104,8 @@ impl<'a> Lexer<'a> {
                 "exp" => TokenKind::Exp,
                 "sqrt" => TokenKind::Sqrt,
                 "sqr" => TokenKind::Sqr,
+                "div" => TokenKind::Div,
+                "mod" => TokenKind::Mod,
                 "e" => {
                     if self.set_variable_values {
                         TokenKind::Number(Num::Float(std::f64::consts::E))
@@ -163,11 +120,9 @@ impl<'a> Lexer<'a> {
                         TokenKind::Pi
                     }
                 }
-                "div" => TokenKind::Div,
-                "mod" => TokenKind::Mod,
                 _ => {
                     if self.set_variable_values {
-                        let value = self.prompt_for_variable_value(&identifier_lower);
+                        let value = self.get_variable_value(&identifier_lower);
                         TokenKind::Number(value)
                     } else {
                         TokenKind::Identifier(identifier)

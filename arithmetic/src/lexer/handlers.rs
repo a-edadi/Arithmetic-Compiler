@@ -1,7 +1,6 @@
 use super::token::{Num, TokenKind};
 use super::CompilerError;
 use crate::Lexer;
-use std::io::{self, Write};
 
 impl<'a> Lexer<'a> {
     pub fn is_number_start(c: &char) -> bool {
@@ -115,71 +114,6 @@ impl<'a> Lexer<'a> {
                 Err(CompilerError::InvalidNumber(
                     number_str, self.line, start_pos,
                 ))
-            }
-        }
-    }
-}
-
-/// Handling the comments
-impl<'a> Lexer<'a> {
-    /// Exclude the rest of the line when // is seen
-    pub fn handle_line_comment(&mut self) {
-        while let Some(c) = self.current_char() {
-            if c == '\n' {
-                break;
-            }
-            self.advance();
-        }
-    }
-
-    // handle block comments
-    pub fn handle_block_comment(&mut self) {
-        self.advance(); // Skip the initial '{'
-        while let Some(c) = self.current_char() {
-            if c == '}' {
-                self.advance(); // Skip the closing '}'
-                break;
-            }
-            self.advance();
-        }
-    }
-
-    /// Prompt for variable value and return as Num
-    pub fn prompt_for_variable_value(&mut self, var_name: &str) -> Num {
-        // Check if the variable has already been assigned a value
-        if let Some(value) = self.variables.get(var_name) {
-            return value.clone(); // Return existing value
-        }
-
-        println!("Enter value for variable '{}':", var_name);
-        loop {
-            let mut input = String::new();
-            print!("> ");
-            io::stdout().flush().unwrap();
-            io::stdin().read_line(&mut input).unwrap();
-
-            // Check if the input has a decimal to determine if it's Float or Integer
-            let trimmed_input = input.trim();
-            if trimmed_input.contains('.') {
-                match trimmed_input.parse::<f64>() {
-                    Ok(value) => {
-                        let num_value = Num::Float(value);
-                        self.variables
-                            .insert(var_name.to_string(), num_value.clone());
-                        return num_value;
-                    }
-                    Err(_) => println!("Invalid input. Please enter a valid number."),
-                }
-            } else {
-                match trimmed_input.parse::<i64>() {
-                    Ok(value) => {
-                        let num_value = Num::Integer(value);
-                        self.variables
-                            .insert(var_name.to_string(), num_value.clone());
-                        return num_value;
-                    }
-                    Err(_) => println!("Invalid input. Please enter a valid number."),
-                }
             }
         }
     }
