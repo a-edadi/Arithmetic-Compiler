@@ -6,7 +6,7 @@ use crate::Lexer;
 
 /// lexes all tokens and returns a vector of theses tokens
 impl<'a> Lexer<'a> {
-    pub fn lex_all_tokens(&mut self) -> Result<Vec<Token>, CompilerError> {
+    pub fn lex_all(&mut self) -> Result<Vec<Token>, CompilerError> {
         let mut tokens_vec = Vec::new();
 
         loop {
@@ -25,8 +25,8 @@ impl<'a> Lexer<'a> {
     }
 
     /// Lexes all tokens and returns a formatted string representation of the input
-    pub fn lex_to_token_string(&mut self) -> Result<String, CompilerError> {
-        let tokens_result = self.lex_all_tokens();
+    pub fn lex_string(&mut self) -> Result<String, CompilerError> {
+        let tokens_result = self.lex_all();
 
         match tokens_result {
             Ok(tokens) => {
@@ -37,19 +37,6 @@ impl<'a> Lexer<'a> {
                 Ok(result)
             }
             Err(e) => Err(e),
-        }
-    }
-
-    #[allow(dead_code)]
-    /// Built in Terminal Printing Utility
-    pub fn lex_print_tokens(&mut self) {
-        match self.lex_to_token_string() {
-            Ok(tokens_string) => {
-                println!("Tokens:\n{}", tokens_string);
-            }
-            Err(e) => {
-                eprintln!("{}", e);
-            }
         }
     }
 }

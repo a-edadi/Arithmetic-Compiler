@@ -27,7 +27,7 @@ pub enum TokenKind {
     Mod,      // Modulo operator: mod
     Power,    // Exponentiation operator: ^
 
-    // Separators
+    // Separators and precedence
     LeftParen,  // (
     RightParen, // )
 
@@ -67,7 +67,6 @@ impl Token {
 }
 
 // Handling the Display for Token, TokenKind and Num
-
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -91,24 +90,17 @@ impl fmt::Display for TokenKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             TokenKind::Number(num) => write!(f, "Number({})", num),
+            TokenKind::Identifier(string) => write!(f, "Identifier({})", string),
+            TokenKind::Func => write!(f, "Func"),
             TokenKind::Plus => write!(f, "+"),
-            // TokenKind::Plus => write!(f, "Plus"),
             TokenKind::Minus => write!(f, "-"),
-            // TokenKind::Minus => write!(f, "Minus"),
             TokenKind::Multiply => write!(f, "*"),
-            // TokenKind::Multiply => write!(f, "Multiply"),
             TokenKind::Divide => write!(f, "/"),
-            // TokenKind::Divide => write!(f, "Divide"),
             TokenKind::Div => write!(f, "div"),
-            // TokenKind::Div => write!(f, "Div"),
             TokenKind::Mod => write!(f, "mod"),
-            // TokenKind::Mod => write!(f, "Modulus"),
             TokenKind::Power => write!(f, "^"),
-            // TokenKind::Power => write!(f, "Power"),
             TokenKind::LeftParen => write!(f, "("),
-            // TokenKind::LeftParen => write!(f, "LeftParen"),
             TokenKind::RightParen => write!(f, ")"),
-            // TokenKind::RightParen => write!(f, "RightParen"),
             TokenKind::Sin => write!(f, "Sin"),
             TokenKind::Cos => write!(f, "Cos"),
             TokenKind::Tan => write!(f, "Tan"),
@@ -125,8 +117,6 @@ impl fmt::Display for TokenKind {
             TokenKind::Mantiss(num_str) => write!(f, "{}", num_str),
             TokenKind::Euler => write!(f, "e"),
             TokenKind::Pi => write!(f, "π"),
-            TokenKind::Func => write!(f, "Func"),
-            TokenKind::Identifier(string) => write!(f, "Identifier({})", string),
             TokenKind::Eof => write!(f, "Eof"),
         }
     }

@@ -2,6 +2,7 @@ pub mod comments;
 pub mod controllers;
 pub mod get_values;
 pub mod handlers;
+pub mod print;
 pub mod span;
 pub mod token;
 pub mod utils;
@@ -33,7 +34,7 @@ impl<'a> Lexer<'a> {
     pub fn get_next_token(&mut self) -> Result<Token, CompilerError> {
         self.skip_whitespace();
 
-        // Ensure that the lexer is in bound
+        // Ensure that the lexer is in bound and not lexing out of range
         if self.current_pos >= self.input.len() {
             let eof_char: char = '\0';
             return Ok(Token::new(
@@ -53,7 +54,7 @@ impl<'a> Lexer<'a> {
             }
         };
 
-        // used for defining span start and end
+        // Define span start
         let start = self.current_pos;
 
         // Check for line comments
@@ -70,15 +71,13 @@ impl<'a> Lexer<'a> {
 
         // Matching
         let kind = if Self::is_number_start(&c) {
-            // Call handle_number, which now returns either a Mantiss or a Number token kind
             let number_kind = self
                 .handle_number()
                 .map_err(|_| CompilerError::UnexpectedError(self.line, self.current_pos))?;
 
-            // After parsing the number, check if the next character is part of an invalid identifier
+            // If the next character is part of an identifier -> Raise Error
             if let Some(next_char) = self.current_char() {
                 if Self::is_identifier_start(&next_char) {
-                    // Raise an error for identifiers starting with a number
                     return Err(CompilerError::InvalidIdentifierStart(
                         self.line,
                         self.current_pos,
@@ -86,14 +85,14 @@ impl<'a> Lexer<'a> {
                 }
             }
 
-            // Directly use the returned `number_kind` (Mantiss or Number)
+            // return Token kind
             number_kind
         } else if Self::is_identifier_start(&c) {
             let identifier = self.handle_identifier()?;
             let identifier_lower = identifier.to_lowercase();
 
             match identifier_lower.as_str() {
-                "func" => TokenKind::Func,
+                "f" => TokenKind::Func,
                 "sin" => TokenKind::Sin,
                 "cos" => TokenKind::Cos,
                 "tan" => TokenKind::Tan,
@@ -109,6 +108,8 @@ impl<'a> Lexer<'a> {
                 "sqr" => TokenKind::Sqr,
                 "div" => TokenKind::Div,
                 "mod" => TokenKind::Mod,
+
+                // Constants
                 "e" => {
                     if self.set_variable_values {
                         TokenKind::Number(Num::Float(std::f64::consts::E))
@@ -123,6 +124,7 @@ impl<'a> Lexer<'a> {
                         TokenKind::Pi
                     }
                 }
+                // Identifiers: All are considered variable in this context
                 _ => {
                     if self.set_variable_values {
                         let value = self.get_variable_value(&identifier_lower);

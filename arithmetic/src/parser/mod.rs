@@ -1,7 +1,7 @@
 pub mod ast;
 pub mod eval;
 pub mod postfix;
-pub mod utils;
+pub mod print;
 
 use crate::errors::CompilerError;
 use crate::lexer::token::Num;
