@@ -1,6 +1,4 @@
-use super::token::{Num, TokenKind};
-use super::CompilerError;
-use crate::Lexer;
+use super::{CompilerError, Lexer, Num, TokenKind};
 
 impl<'a> Lexer<'a> {
     /// 0...9

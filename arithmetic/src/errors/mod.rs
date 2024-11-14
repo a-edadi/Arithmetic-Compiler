@@ -8,10 +8,13 @@ pub enum CompilerError {
     UnexpectedError(usize, usize),
     InvalidIdentifierStart(usize, usize),
 
+    // Parser Errors
     UnexpectedToken(TokenKind, usize, usize),
-    MissingToken(String),
+    MissingLParen(usize, usize),
+    MissingRParen(usize, usize),
     DivisionByZero(usize),
-    MissingOperator(Option<String>),
+    MissingOperator(usize, usize),
+
     // Evaluation errors
     EvalDivisionByZero,
     IntegerOperatorWithFloatOperands,
@@ -20,80 +23,99 @@ pub enum CompilerError {
     UnsupportedFunction(String),
     TryEvalUnreachable(String),
 }
-// Implement Display for CompileError to provide custom error messages
+
+// Implement Display for CompilerError to provide descriptive error messages
 impl fmt::Display for CompilerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             CompilerError::InvalidNumber(num, line, pos) => {
                 write!(
                     f,
-                    "Error: Invalid number '{}', In line: {}, at position {}",
+                    "Syntax Error: Invalid number '{}', found at line {}, position {}.",
                     num, line, pos
                 )
             }
             CompilerError::InvalidCharacter(char, line, pos) => {
                 write!(
                     f,
-                    "Error: Invalid Char '{}', In line: {}, at position {}",
+                    "Syntax Error: Invalid character '{}', found at line {}, position {}.",
                     char, line, pos
                 )
             }
             CompilerError::UnexpectedError(line, pos) => {
                 write!(
                     f,
-                    "Error: Unexpected Error Occurred in Line: {}, at position: {}",
+                    "Unexpected Error: Occurred at line {}, position {}.",
                     line, pos
                 )
             }
             CompilerError::InvalidIdentifierStart(line, pos) => {
                 write!(
                     f,
-                    "Error: Identifier cannot start with a number found at at line {}, position {}",
+                    "Syntax Error: Identifier cannot start with a number, found at line {}, position {}.",
                     line, pos
                 )
             }
             CompilerError::UnexpectedToken(kind, line, pos) => {
                 write!(
                     f,
-                    "Compile Error: Unexpected token '{}' detected at line: {}, position: {}",
+                    "Syntax Error: Unexpected token '{}' at line {}, position {}.",
                     kind, line, pos
                 )
             }
-            CompilerError::MissingToken(token) => {
-                write!(f, "Compile Error: Expected token '{}' is missing", token)
+            CompilerError::MissingLParen(line, pos) => {
+                write!(
+                    f,
+                    "Syntax Error: Missing '(' at line {}, position {}.",
+                    line, pos
+                )
+            }
+            CompilerError::MissingRParen(line, pos) => {
+                write!(
+                    f,
+                    "Syntax Error: Missing ')' at line {}, position {}.",
+                    line, pos
+                )
             }
             CompilerError::DivisionByZero(pos) => {
                 write!(
                     f,
-                    "Compile Error: Attempted division by zero at position {}",
+                    "Runtime Error: Division by zero attempted at position {}.",
                     pos
                 )
             }
-            CompilerError::MissingOperator(string) => {
-                write!(f, "Compile Error: Missing Operator. {:?}", string)
+            CompilerError::MissingOperator(line, pos) => {
+                write!(
+                    f,
+                    "Syntax Error: Missing operator at line {}, position {}.",
+                    line, pos
+                )
             }
             CompilerError::EvalDivisionByZero => {
-                write!(f, "Can not evaluate Division by zero")
+                write!(
+                    f,
+                    "Runtime Error: Cannot evaluate expression due to division by zero."
+                )
             }
             CompilerError::IntegerOperatorWithFloatOperands => {
                 write!(
                     f,
-                    "Integer operator (Div or Mod) only supports integer operands"
+                    "Runtime Error: Integer operators (Div or Mod) require integer operands only."
                 )
             }
             CompilerError::UnsupportedBinaryOperator(op) => {
-                write!(f, "Unsupported binary operator: {}", op)
+                write!(f, "Syntax Error: Unsupported binary operator '{}'.", op)
             }
             CompilerError::UnsupportedUnaryOperator(op) => {
-                write!(f, "Unsupported Unary operator: {}", op)
+                write!(f, "Syntax Error: Unsupported unary operator '{}'.", op)
             }
             CompilerError::UnsupportedFunction(func) => {
-                write!(f, "Unsupported Function: {}", func)
+                write!(f, "Syntax Error: Unsupported function '{}'.", func)
             }
             CompilerError::TryEvalUnreachable(s) => {
                 write!(
                     f,
-                    "Tried to eval without values! You need to Provide values for evaluation: {}",
+                    "Evaluation Error: Unable to evaluate expression without values. {}",
                     s
                 )
             }

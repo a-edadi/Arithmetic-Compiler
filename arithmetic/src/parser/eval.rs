@@ -1,10 +1,9 @@
-use super::{ASTNode, TokenKind};
-use crate::errors::CompilerError;
-use crate::lexer::token::Num;
+use super::{ASTNode, CompilerError, Num, TokenKind};
+
 use std::f64::consts::PI;
 
+/// Recursively evaluates the AST and return Number
 impl ASTNode {
-    /// Recursively evaluates the AST and returns a floating-point result
     pub fn evaluate(&self) -> Result<f64, CompilerError> {
         match self {
             ASTNode::Number(n) => match n {
@@ -82,6 +81,7 @@ impl ASTNode {
         }
     }
 
+    /// wrapper for the implementation above.
     pub fn eval_result(&self) -> String {
         match self.evaluate() {
             Ok(result) => format!("Evaluation result: {}", result),

@@ -1,4 +1,4 @@
-use super::{ast::ASTNode, Lexer, Parser};
+use super::{ASTNode, Lexer, Parser};
 
 /// Lex, Parse input and return AST
 pub fn lex_parse_input(input: &str, use_variables: bool) -> Result<ASTNode, String> {
@@ -19,6 +19,7 @@ pub fn print_ast(input: &str) {
     }
 }
 
+#[allow(dead_code)]
 /// Prints AST from the input
 /// replaces variables with actual values provided by the user
 pub fn print_ast_with_values(input: &str) {

@@ -1,11 +1,7 @@
-use super::CompilerError;
+use super::{CompilerError, Lexer, Token, TokenKind};
 
-use super::token::{Token, TokenKind};
-
-use crate::Lexer;
-
-/// lexes all tokens and returns a vector of theses tokens
 impl<'a> Lexer<'a> {
+    /// lexes all tokens and returns a vector of theses tokens
     pub fn lex_all(&mut self) -> Result<Vec<Token>, CompilerError> {
         let mut tokens_vec = Vec::new();
 

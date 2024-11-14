@@ -4,14 +4,12 @@ pub mod postfix;
 pub mod print;
 
 use crate::errors::CompilerError;
-use crate::lexer::token::Num;
 use crate::lexer::{
-    token::{Token, TokenKind},
+    token::{Num, Token, TokenKind},
     Lexer,
 };
 use ast::ASTNode;
 
-/// Parser
 pub struct Parser<'a> {
     lexer: Lexer<'a>,
     current_token: Token,
@@ -34,10 +32,11 @@ impl<'a> Parser<'a> {
 
     // Parser Advance method: Calls the lexer to get the next token
     pub fn advance(&mut self) -> Result<(), CompilerError> {
-        self.current_token = self.lexer.get_next_token()?; // Move to the next token
+        self.current_token = self.lexer.get_next_token()?;
         Ok(())
     }
 
+    /// RDP starting point:
     pub fn parse_expression(&mut self) -> Result<ASTNode, CompilerError> {
         let mut node = self.parse_term()?; // Start with parsing a term
 
@@ -50,8 +49,9 @@ impl<'a> Parser<'a> {
 
         Ok(node)
     }
+
     pub fn parse_term(&mut self) -> Result<ASTNode, CompilerError> {
-        // Start with parsing the first factor
+        // Start with parsing the right factor
         let mut node = self.parse_exponentiation()?;
 
         // Parse multiplication, division, mod, and div, which are left-associative
@@ -94,6 +94,7 @@ impl<'a> Parser<'a> {
 
         Ok(node)
     }
+
     pub fn parse_factor(&mut self) -> Result<ASTNode, CompilerError> {
         match &self.current_token.kind {
             // Handle unary minus (negation)
@@ -110,36 +111,42 @@ impl<'a> Parser<'a> {
                 Ok(operand)
             }
 
-            // Number literal
+            // Handle Number literal
             TokenKind::Number(n) => {
-                let value = n.clone(); // Clone Num (either Integer or Float)
+                let value = n.clone();
                 self.advance()?;
 
                 // Check if the next token is also a number without an operator between them
                 if let TokenKind::Number(_) = self.current_token.kind {
-                    return Err(CompilerError::MissingOperator(Some(
-                        "2 consecutive numbers were passed without an operator".to_string(),
-                    )));
+                    return Err(CompilerError::MissingOperator(
+                        self.lexer.get_line(),
+                        self.lexer.get_position(),
+                    ));
                 }
-                Ok(ASTNode::Number(value)) // Adapt ASTNode::Number to accept Num directly
+
+                Ok(ASTNode::Number(value))
             }
 
+            // Handle Mantiss
             TokenKind::Mantiss(mantiss_str) => {
                 let mantiss_value = mantiss_str.clone();
                 self.advance()?;
                 Ok(ASTNode::Mantiss(mantiss_value))
             }
 
+            // Handle Euler's number(e)
             TokenKind::Euler => {
                 self.advance()?;
                 Ok(ASTNode::Constant(TokenKind::Euler))
             }
+
+            // Handle Pi
             TokenKind::Pi => {
                 self.advance()?;
                 Ok(ASTNode::Constant(TokenKind::Pi))
             }
 
-            // Handle functions (Sin, Cos, Tan, etc.)
+            // Handle functions: Sin, Cos, Tan, ...
             TokenKind::Sin
             | TokenKind::Cos
             | TokenKind::Tan
@@ -154,20 +161,31 @@ impl<'a> Parser<'a> {
             | TokenKind::Sqrt
             | TokenKind::Sqr => {
                 let func_name = self.current_token.kind.clone();
+
                 self.advance()?;
 
+                // after function there should be parens like sin(
+                // if there is no left paren Raise error, we are expecting LeftParen
                 if self.current_token.kind != TokenKind::LeftParen {
-                    return Err(CompilerError::UnexpectedToken(
-                        self.current_token.kind.clone(),
+                    return Err(CompilerError::MissingLParen(
                         self.lexer.get_position(),
                         self.lexer.get_line(),
                     ));
                 }
+
                 self.advance()?; // Skip '('
+
+                // Parse Inner expression
                 let argument = self.parse_expression()?;
+
+                // after parsing the inner expression we are looking for ) RightParen
                 if self.current_token.kind != TokenKind::RightParen {
-                    return Err(CompilerError::MissingToken(")".to_string()));
+                    return Err(CompilerError::MissingRParen(
+                        self.lexer.get_line(),
+                        self.lexer.get_position(),
+                    ));
                 }
+
                 self.advance()?; // Skip ')'
 
                 let func_name = match func_name {
@@ -193,6 +211,7 @@ impl<'a> Parser<'a> {
                     }
                 };
 
+                // Add the node to the Tree
                 Ok(ASTNode::FunctionCall(
                     func_name.to_string(),
                     Box::new(argument),
@@ -211,12 +230,20 @@ impl<'a> Parser<'a> {
                 self.advance()?;
                 let node = self.parse_expression()?;
                 if self.current_token.kind != TokenKind::RightParen {
-                    return Err(CompilerError::MissingToken(")".to_string()));
+                    return Err(CompilerError::MissingRParen(
+                        self.lexer.get_line(),
+                        self.lexer.get_position(),
+                    ));
                 }
                 self.advance()?; // Skip ')'
                 Ok(node)
             }
-            TokenKind::RightParen => Err(CompilerError::MissingToken("(".to_string())),
+
+            // handle single right paren, Missing left paren
+            TokenKind::RightParen => Err(CompilerError::MissingLParen(
+                self.lexer.get_line(),
+                self.lexer.get_position(),
+            )),
 
             // Unexpected token
             _ => Err(CompilerError::UnexpectedToken(

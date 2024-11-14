@@ -1,20 +1,18 @@
-use crate::lexer::token::Num;
-
-use super::TokenKind;
+use super::{Num, TokenKind};
 
 #[derive(Debug)]
 pub enum ASTNode {
     Number(Num),                                     // A number node
     Mantiss(String),                                 // Mantissa representation as a string
+    Constant(TokenKind),                             // Pi and Euler
     Identifier(String),                              // A variable or function name
     BinaryOp(Box<ASTNode>, TokenKind, Box<ASTNode>), // A binary operation node using TokenKind
     UnaryOp(TokenKind, Box<ASTNode>),                // A unary operation node
     FunctionCall(String, Box<ASTNode>),              // Function call node (name, argument)
-    Constant(TokenKind),                             // Pi and Euler
 }
 
+/// Recursive function that returns the tree structure as a string
 impl ASTNode {
-    // Recursive function that returns the tree structure as a string
     pub fn to_string_tree(&self, prefix: String, is_left: bool) -> String {
         match self {
             // Formatting a number node

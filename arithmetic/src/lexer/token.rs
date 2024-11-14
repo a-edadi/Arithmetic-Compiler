@@ -1,4 +1,5 @@
-use crate::lexer::span::TextSpan;
+use super::TextSpan;
+
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -8,7 +9,6 @@ pub enum Num {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-
 pub enum TokenKind {
     // Literals
     Number(Num),
@@ -71,7 +71,8 @@ impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "Token: {:?}\n  Span: {:?}\n  Literal: \"{}\" \n",
+            // "Token: {:?}\n  Span: {:?}\n  Literal: \"{}\" \n", // Prettier
+            "Token: {:?} Span: {:?}  Literal: \"{}\"", // Just like debug print, Minimal space.
             self.kind, self.span, self.span.literal
         )
     }

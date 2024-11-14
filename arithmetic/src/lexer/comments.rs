@@ -1,7 +1,7 @@
 use super::Lexer;
 
+/// Exclude the rest of the line when // is seen
 impl<'a> Lexer<'a> {
-    /// Exclude the rest of the line when // is seen
     pub fn handle_line_comment(&mut self) {
         while let Some(c) = self.current_char() {
             if c == '\n' {

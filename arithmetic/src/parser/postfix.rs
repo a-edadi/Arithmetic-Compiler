@@ -1,6 +1,4 @@
-use crate::lexer::token::Num;
-
-use super::{ASTNode, TokenKind};
+use super::{ASTNode, Num, TokenKind};
 
 /// Converts the AST into a postfix notation string.
 impl ASTNode {
