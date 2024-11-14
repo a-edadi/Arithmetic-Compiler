@@ -4,6 +4,7 @@ pub mod postfix;
 pub mod utils;
 
 use crate::errors::CompilerError;
+use crate::lexer::token::Num;
 use crate::lexer::{
     token::{Token, TokenKind},
     Lexer,
@@ -62,9 +63,13 @@ impl<'a> Parser<'a> {
             self.advance()?;
             let right_node = self.parse_exponentiation()?;
 
-            // Handle division by zero
-            if let (TokenKind::Divide, ASTNode::Number(0.0)) = (&op, &right_node) {
-                return Err(CompilerError::DivisionByZero(self.lexer.get_position()));
+            // Handle division by zero for both integer and float cases
+            if let TokenKind::Divide | TokenKind::Div = &op {
+                if let ASTNode::Number(Num::Integer(0)) | ASTNode::Number(Num::Float(0.0)) =
+                    &right_node
+                {
+                    return Err(CompilerError::DivisionByZero(self.lexer.get_position()));
+                }
             }
 
             node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node));
@@ -107,15 +112,16 @@ impl<'a> Parser<'a> {
 
             // Number literal
             TokenKind::Number(n) => {
-                let value = *n;
+                let value = n.clone(); // Clone Num (either Integer or Float)
                 self.advance()?;
+
                 // Check if the next token is also a number without an operator between them
                 if let TokenKind::Number(_) = self.current_token.kind {
                     return Err(CompilerError::MissingOperator(Some(
                         "2 consecutive numbers were passed without an operator".to_string(),
                     )));
                 }
-                Ok(ASTNode::Number(value))
+                Ok(ASTNode::Number(value)) // Adapt ASTNode::Number to accept Num directly
             }
 
             TokenKind::Euler => {

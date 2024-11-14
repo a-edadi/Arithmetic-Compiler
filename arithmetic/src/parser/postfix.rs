@@ -1,9 +1,18 @@
+use crate::lexer::token::Num;
+
 use super::{ASTNode, TokenKind};
 
 pub fn ast_to_postfix(node: &ASTNode) -> String {
     match node {
         // Handle a number node
-        ASTNode::Number(n) => format!("{} ", n),
+        // Handle a number node
+        ASTNode::Number(n) => {
+            let number_str = match n {
+                Num::Integer(i) => i.to_string(),
+                Num::Float(f) => f.to_string(),
+            };
+            format!("{} ", number_str)
+        }
 
         // Handle an identifier node
         ASTNode::Identifier(id) => format!("{} ", id),

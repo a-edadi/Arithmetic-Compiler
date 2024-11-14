@@ -2,9 +2,9 @@ mod ast;
 use crate::lexer::Lexer;
 use crate::parser::{ast::ASTNode, eval::evaluate_ast, postfix::ast_to_postfix, Parser};
 use ast::print_ast_tree;
+pub mod lexer_print;
 
 /// Wrappers to make printing to terminal IO easier.
-
 pub fn print_ast(input: &str) {
     let lexer = Lexer::new(input);
 

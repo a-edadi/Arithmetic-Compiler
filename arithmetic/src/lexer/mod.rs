@@ -6,14 +6,14 @@ pub mod utils;
 use crate::errors::CompilerError;
 use std::collections::HashMap;
 use text::TextSpan;
-use token::{Token, TokenKind};
+use token::{Num, Token, TokenKind};
 
 pub struct Lexer<'a> {
     input: &'a str,
     current_pos: usize,
     line: usize,
     set_variable_values: bool,
-    variables: HashMap<String, f64>,
+    variables: HashMap<String, Num>,
 }
 
 impl<'a> Lexer<'a> {
@@ -61,13 +61,6 @@ impl<'a> Lexer<'a> {
     /// Returns the next char without moving the position of the lexer
     pub fn peek_char(&self) -> Option<char> {
         self.input.chars().nth(self.current_pos + 1)
-    }
-
-    /// Sometime handler advances and is moving on and calling peek char returns 2 chars ahead
-    /// like and input like this "1 mod" when the handle number is called we are currently at
-    /// the white space and when peek char gets called it returns m but it should return white space
-    pub fn peek_current_char(&self) -> Option<char> {
-        self.input.chars().nth(self.current_pos)
     }
 
     pub fn get_position(&self) -> usize {
@@ -122,12 +115,12 @@ impl<'a> Lexer<'a> {
         }
 
         let kind = if Self::is_number_start(&c) {
-            let number = self
+            let number_kind = self
                 .handle_number()
                 .map_err(|_| CompilerError::UnexpectedError(self.line, self.current_pos))?;
 
             // After parsing the number, check if the next character is part of an invalid identifier
-            if let Some(next_char) = self.peek_current_char() {
+            if let Some(next_char) = self.current_char() {
                 if Self::is_identifier_start(&next_char) {
                     return Err(CompilerError::InvalidIdentifierStart(
                         self.line,
@@ -136,10 +129,7 @@ impl<'a> Lexer<'a> {
                 }
             }
 
-            TokenKind::Number(number)
-        } else if Self::is_mantis(&c) {
-            self.advance();
-            TokenKind::Mantis
+            TokenKind::Number(number_kind)
         } else if Self::is_identifier_start(&c) {
             let identifier = self.handle_identifier()?;
             let identifier_lower = identifier.to_lowercase();
@@ -161,14 +151,14 @@ impl<'a> Lexer<'a> {
                 "sqr" => TokenKind::Sqr,
                 "e" => {
                     if self.set_variable_values {
-                        TokenKind::Number(std::f64::consts::E)
+                        TokenKind::Number(Num::Float(std::f64::consts::E))
                     } else {
                         TokenKind::Euler
                     }
                 }
                 "pi" => {
                     if self.set_variable_values {
-                        TokenKind::Number(3.0)
+                        TokenKind::Number(Num::Float(std::f64::consts::PI))
                     } else {
                         TokenKind::Pi
                     }

@@ -43,8 +43,3 @@ impl<'a> Lexer<'a> {
         }
     }
 }
-
-pub fn lex_print_from_input(input: &str) {
-    let mut lexer = Lexer::new(input);
-    lexer.lex_print_tokens();
-}

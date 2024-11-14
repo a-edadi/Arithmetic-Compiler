@@ -1,10 +1,15 @@
+use crate::lexer::token::Num;
+
 use super::{ASTNode, TokenKind};
 use std::f64::consts::{E, PI};
 
 /// Evaluates an AST and returns a single floating-point result
 pub fn evaluate_ast(node: &ASTNode) -> Result<f64, String> {
     match node {
-        ASTNode::Number(n) => Ok(*n),
+        ASTNode::Number(n) => match n {
+            Num::Integer(i) => Ok(*i as f64),
+            Num::Float(f) => Ok(*f),
+        },
 
         ASTNode::Identifier(id) => Err(format!("variable '{}'", id)),
 
@@ -25,9 +30,25 @@ pub fn evaluate_ast(node: &ASTNode) -> Result<f64, String> {
                         Ok(left_val / right_val)
                     }
                 }
-                TokenKind::Mod => Ok(left_val % right_val),
-                TokenKind::Div => Ok((left_val / right_val).floor()), // Integer division
-                TokenKind::Power => Ok(left_val.powf(right_val)),     // Exponentiation
+                TokenKind::Mod => {
+                    // Ensure both left and right values are integers for modulus
+                    if left_val.fract() != 0.0 || right_val.fract() != 0.0 {
+                        Err("Mod operator only supports integer operands".to_string())
+                    } else {
+                        Ok(left_val % right_val)
+                    }
+                }
+                TokenKind::Div => {
+                    // Ensure both left and right values are integers for integer division
+                    if left_val.fract() != 0.0 || right_val.fract() != 0.0 {
+                        Err("Div operator only supports integer operands".to_string())
+                    } else if right_val == 0.0 {
+                        Err("Division by zero".to_string())
+                    } else {
+                        Ok((left_val / right_val).floor())
+                    }
+                }
+                TokenKind::Power => Ok(left_val.powf(right_val)), // Exponentiation
                 _ => Err(format!("Unsupported binary operator: {:?}", op)),
             }
         }

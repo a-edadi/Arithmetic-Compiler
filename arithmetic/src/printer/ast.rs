@@ -1,9 +1,21 @@
+use crate::lexer::token::Num;
+
 use super::ASTNode;
+
 pub fn print_ast_tree(node: &ASTNode, prefix: String, is_left: bool) {
     match node {
         // Printing a number node
         ASTNode::Number(n) => {
-            println!("{}{}{}", prefix, if is_left { "├── " } else { "└── " }, n);
+            let number_str = match n {
+                Num::Integer(i) => i.to_string(),
+                Num::Float(f) => f.to_string(),
+            };
+            println!(
+                "{}{}{}",
+                prefix,
+                if is_left { "├── " } else { "└── " },
+                number_str
+            );
         }
         // Printing an identifier node
         ASTNode::Identifier(id) => {

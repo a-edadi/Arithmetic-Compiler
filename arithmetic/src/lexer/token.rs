@@ -3,9 +3,16 @@ use std::fmt;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq)]
+
+pub enum Num {
+    Integer(i64),
+    Float(f64),
+}
+#[derive(Debug, Clone, PartialEq)]
+
 pub enum TokenKind {
     // Literals
-    Number(f64),
+    Number(Num),
 
     // Identifier
     Func,
@@ -38,7 +45,6 @@ pub enum TokenKind {
     Exp,
     Sqrt,
     Sqr,
-    Mantis,
 
     // Constants
     Euler,
@@ -46,6 +52,8 @@ pub enum TokenKind {
 
     // Other
     Eof,
+    // Scientific Notations
+    // Mantis,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -73,7 +81,7 @@ impl fmt::Display for Token {
 impl fmt::Display for TokenKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            TokenKind::Number(num) => write!(f, "Number({})", num),
+            TokenKind::Number(num) => write!(f, "Number({:?})", num),
             TokenKind::Plus => write!(f, "+"),
             // TokenKind::Plus => write!(f, "Plus"),
             TokenKind::Minus => write!(f, "-"),
@@ -105,7 +113,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Exp => write!(f, "Exp"),
             TokenKind::Sqrt => write!(f, "Sqrt"),
             TokenKind::Sqr => write!(f, "Sqr"),
-            TokenKind::Mantis => write!(f, "E"),
+            // TokenKind::Mantis => write!(f, "E"),
             TokenKind::Euler => write!(f, "e"),
             TokenKind::Pi => write!(f, "π"),
             TokenKind::Func => write!(f, "Func"),

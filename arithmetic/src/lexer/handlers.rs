@@ -1,4 +1,4 @@
-use super::token::TokenKind;
+use super::token::{Num, TokenKind};
 use super::CompilerError;
 use crate::Lexer;
 use std::io::{self, Write};
@@ -20,9 +20,6 @@ impl<'a> Lexer<'a> {
         c.is_ascii()
     }
 
-    pub fn is_mantis(c: &char) -> bool {
-        *c == 'E'
-    }
     /// Skip White spaces.
     pub fn skip_whitespace(&mut self) {
         while let Some(c) = self.current_char() {
@@ -83,8 +80,7 @@ impl<'a> Lexer<'a> {
         Ok(identifier)
     }
 
-    /// Handle numbers by collecting the numbers inside a string and parsing them
-    pub fn handle_number(&mut self) -> Result<f64, CompilerError> {
+    pub fn handle_number(&mut self) -> Result<Num, CompilerError> {
         let start_pos = self.current_pos;
         let mut number_str = String::new();
         let mut has_dot = false;
@@ -103,13 +99,23 @@ impl<'a> Lexer<'a> {
             }
         }
 
-        // Try to parse the number as f64
-        if let Ok(number) = number_str.parse::<f64>() {
-            Ok(number)
+        // Parse as Float if it has a decimal point, else as Integer
+        if has_dot {
+            if let Ok(float_num) = number_str.parse::<f64>() {
+                Ok(Num::Float(float_num))
+            } else {
+                Err(CompilerError::InvalidNumber(
+                    number_str, self.line, start_pos,
+                ))
+            }
         } else {
-            Err(CompilerError::InvalidNumber(
-                number_str, self.line, start_pos,
-            ))
+            if let Ok(int_num) = number_str.parse::<i64>() {
+                Ok(Num::Integer(int_num))
+            } else {
+                Err(CompilerError::InvalidNumber(
+                    number_str, self.line, start_pos,
+                ))
+            }
         }
     }
 }
@@ -118,7 +124,7 @@ impl<'a> Lexer<'a> {
 impl<'a> Lexer<'a> {
     /// Exclude the rest of the line when // is seen
     pub fn handle_line_comment(&mut self) {
-        while let Some(c) = self.peek_current_char() {
+        while let Some(c) = self.current_char() {
             if c == '\n' {
                 break;
             }
@@ -129,7 +135,7 @@ impl<'a> Lexer<'a> {
     // handle block comments
     pub fn handle_block_comment(&mut self) {
         self.advance(); // Skip the initial '{'
-        while let Some(c) = self.peek_current_char() {
+        while let Some(c) = self.current_char() {
             if c == '}' {
                 self.advance(); // Skip the closing '}'
                 break;
@@ -138,28 +144,41 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    /// Helper method to prompt user for a variable value and store it in `variables`
-    pub fn prompt_for_variable_value(&mut self, var_name: &str) -> f64 {
+    /// Prompt for variable value and return as Num
+    pub fn prompt_for_variable_value(&mut self, var_name: &str) -> Num {
         // Check if the variable has already been assigned a value
-        if let Some(&value) = self.variables.get(var_name) {
-            return value; // Return existing value
+        if let Some(value) = self.variables.get(var_name) {
+            return value.clone(); // Return existing value
         }
 
-        // Prompt the user for input if variable hasn't been set
         println!("Enter value for variable '{}':", var_name);
         loop {
             let mut input = String::new();
             print!("> ");
-            io::stdout().flush().unwrap(); // Display the prompt immediately
+            io::stdout().flush().unwrap();
             io::stdin().read_line(&mut input).unwrap();
 
-            match input.trim().parse::<f64>() {
-                Ok(value) => {
-                    self.variables.insert(var_name.to_string(), value); // Store in HashMap
-                    return value;
+            // Check if the input has a decimal to determine if it's Float or Integer
+            let trimmed_input = input.trim();
+            if trimmed_input.contains('.') {
+                match trimmed_input.parse::<f64>() {
+                    Ok(value) => {
+                        let num_value = Num::Float(value);
+                        self.variables
+                            .insert(var_name.to_string(), num_value.clone());
+                        return num_value;
+                    }
+                    Err(_) => println!("Invalid input. Please enter a valid number."),
                 }
-                Err(_) => {
-                    println!("Invalid input. Please enter a valid number.");
+            } else {
+                match trimmed_input.parse::<i64>() {
+                    Ok(value) => {
+                        let num_value = Num::Integer(value);
+                        self.variables
+                            .insert(var_name.to_string(), num_value.clone());
+                        return num_value;
+                    }
+                    Err(_) => println!("Invalid input. Please enter a valid number."),
                 }
             }
         }
