@@ -1,14 +1,14 @@
 use super::{Num, TokenKind};
-
+#[allow(dead_code)]
 #[derive(Debug)]
 pub enum ASTNode {
-    Number(Num),                                     // A number node
-    Mantiss(String),                                 // Mantissa representation as a string
-    Constant(TokenKind),                             // Pi and Euler
-    Identifier(String),                              // A variable or function name
-    BinaryOp(Box<ASTNode>, TokenKind, Box<ASTNode>), // A binary operation node using TokenKind
-    UnaryOp(TokenKind, Box<ASTNode>),                // A unary operation node
-    FunctionCall(String, Box<ASTNode>),              // Function call node (name, argument)
+    Number(Num, usize),         // A number node with span info
+    Mantiss(String, usize),     // Mantissa representation as a string
+    Constant(TokenKind, usize), // Constant node with span info
+    Identifier(String, usize),  // Identifier with span info
+    BinaryOp(Box<ASTNode>, TokenKind, Box<ASTNode>, usize), // Binary operation with span info
+    UnaryOp(TokenKind, Box<ASTNode>, usize), // Unary operation with span info
+    FunctionCall(String, Box<ASTNode>, usize), // Function call with span info
 }
 
 /// Recursive function that returns the tree structure as a string
@@ -16,7 +16,7 @@ impl ASTNode {
     pub fn to_string_tree(&self, prefix: String, is_left: bool) -> String {
         match self {
             // Formatting a number node
-            ASTNode::Number(n) => {
+            ASTNode::Number(n, _) => {
                 let number_str = match n {
                     Num::Integer(i) => i.to_string(),
                     Num::Float(f) => f.to_string(),
@@ -29,7 +29,7 @@ impl ASTNode {
                 )
             }
             // Formatting a mantissa node
-            ASTNode::Mantiss(mantiss_str) => {
+            ASTNode::Mantiss(mantiss_str, _) => {
                 format!(
                     "{}{}{}\n",
                     prefix,
@@ -38,7 +38,7 @@ impl ASTNode {
                 )
             }
             // Formatting an identifier node
-            ASTNode::Identifier(id) => {
+            ASTNode::Identifier(id, _) => {
                 format!(
                     "{}{}{}\n",
                     prefix,
@@ -47,11 +47,11 @@ impl ASTNode {
                 )
             }
             // Formatting a constant node: E or Pi
-            ASTNode::Constant(c) => {
+            ASTNode::Constant(c, _) => {
                 format!("{}{}{}\n", prefix, if is_left { "├── " } else { "└── " }, c)
             }
             // Formatting a binary operation node: +, -, *, /
-            ASTNode::BinaryOp(left, op, right) => {
+            ASTNode::BinaryOp(left, op, right, _) => {
                 let mut result = format!(
                     "{}{}{}\n",
                     prefix,
@@ -64,7 +64,7 @@ impl ASTNode {
                 result
             }
             // Formatting a unary operation node: -x
-            ASTNode::UnaryOp(op, expr) => {
+            ASTNode::UnaryOp(op, expr, _) => {
                 let mut result = format!(
                     "{}{}{}\n",
                     prefix,
@@ -76,7 +76,7 @@ impl ASTNode {
                 result
             }
             // Formatting a function call node: sin(x), sqrt(x)
-            ASTNode::FunctionCall(func, arg) => {
+            ASTNode::FunctionCall(func, arg, _) => {
                 let mut result = format!(
                     "{}{}{}\n",
                     prefix,

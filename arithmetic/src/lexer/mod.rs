@@ -41,6 +41,7 @@ impl<'a> Lexer<'a> {
             return Ok(Token::new(
                 TokenKind::Eof,
                 TextSpan::new(self.current_pos, self.current_pos, eof_char.to_string()),
+                self.line,
             ));
         }
 
@@ -58,6 +59,7 @@ impl<'a> Lexer<'a> {
 
         // Define span start
         let start = self.current_pos;
+        let line = self.line;
 
         // Check for line comments
         if c == '/' && self.peek_char() == Some('/') {
@@ -146,6 +148,6 @@ impl<'a> Lexer<'a> {
         let literal = self.input[start..end].to_string();
         let span = TextSpan::new(start, end, literal);
 
-        Ok(Token::new(kind, span))
+        Ok(Token::new(kind, span, line))
     }
 }

@@ -58,11 +58,12 @@ pub enum TokenKind {
 pub struct Token {
     pub kind: TokenKind,
     pub span: TextSpan,
+    pub line: usize,
 }
 
 impl Token {
-    pub fn new(kind: TokenKind, span: TextSpan) -> Self {
-        Self { kind, span }
+    pub fn new(kind: TokenKind, span: TextSpan, line: usize) -> Self {
+        Self { kind, span, line }
     }
 }
 

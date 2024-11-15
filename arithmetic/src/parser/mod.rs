@@ -42,9 +42,10 @@ impl<'a> Parser<'a> {
 
         while matches!(self.current_token.kind, TokenKind::Plus | TokenKind::Minus) {
             let op = self.current_token.kind.clone();
+            let line = self.current_token.line;
             self.advance()?;
             let right_node = self.parse_term()?;
-            node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node));
+            node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node), line);
         }
 
         Ok(node)
@@ -60,19 +61,21 @@ impl<'a> Parser<'a> {
             TokenKind::Multiply | TokenKind::Divide | TokenKind::Mod | TokenKind::Div
         ) {
             let op = self.current_token.kind.clone();
+            let line = self.current_token.line;
+
             self.advance()?;
             let right_node = self.parse_exponentiation()?;
 
             // Handle division by zero for both integer and float cases
             if let TokenKind::Divide | TokenKind::Div = &op {
-                if let ASTNode::Number(Num::Integer(0)) | ASTNode::Number(Num::Float(0.0)) =
+                if let ASTNode::Number(Num::Integer(0), _) | ASTNode::Number(Num::Float(0.0), _) =
                     &right_node
                 {
                     return Err(CompilerError::DivisionByZero(self.lexer.get_position()));
                 }
             }
 
-            node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node));
+            node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node), line);
         }
 
         Ok(node)
@@ -86,22 +89,26 @@ impl<'a> Parser<'a> {
         // Handle exponentiation as right-associative
         if self.current_token.kind == TokenKind::Power {
             let op = self.current_token.kind.clone();
+            let line = self.current_token.line;
+
             self.advance()?;
             let right_node = self.parse_exponentiation()?; // Recur to handle right-associativity
 
-            node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node));
+            node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node), line);
         }
 
         Ok(node)
     }
 
     pub fn parse_factor(&mut self) -> Result<ASTNode, CompilerError> {
+        let line = self.current_token.line;
+
         match &self.current_token.kind {
             // Handle unary minus (negation)
             TokenKind::Minus => {
                 self.advance()?;
                 let operand = self.parse_factor()?;
-                Ok(ASTNode::UnaryOp(TokenKind::Minus, Box::new(operand)))
+                Ok(ASTNode::UnaryOp(TokenKind::Minus, Box::new(operand), line))
             }
 
             // Handle unary plus
@@ -124,26 +131,26 @@ impl<'a> Parser<'a> {
                     ));
                 }
 
-                Ok(ASTNode::Number(value))
+                Ok(ASTNode::Number(value, line))
             }
 
             // Handle Mantiss
             TokenKind::Mantiss(mantiss_str) => {
                 let mantiss_value = mantiss_str.clone();
                 self.advance()?;
-                Ok(ASTNode::Mantiss(mantiss_value))
+                Ok(ASTNode::Mantiss(mantiss_value, line))
             }
 
             // Handle Euler's number(e)
             TokenKind::Euler => {
                 self.advance()?;
-                Ok(ASTNode::Constant(TokenKind::Euler))
+                Ok(ASTNode::Constant(TokenKind::Euler, line))
             }
 
             // Handle Pi
             TokenKind::Pi => {
                 self.advance()?;
-                Ok(ASTNode::Constant(TokenKind::Pi))
+                Ok(ASTNode::Constant(TokenKind::Pi, line))
             }
 
             // Handle functions: Sin, Cos, Tan, ...
@@ -215,6 +222,7 @@ impl<'a> Parser<'a> {
                 Ok(ASTNode::FunctionCall(
                     func_name.to_string(),
                     Box::new(argument),
+                    line,
                 ))
             }
 
@@ -222,7 +230,7 @@ impl<'a> Parser<'a> {
             TokenKind::Identifier(id) => {
                 let identifier = id.clone();
                 self.advance()?;
-                Ok(ASTNode::Identifier(identifier))
+                Ok(ASTNode::Identifier(identifier, line))
             }
 
             // Parentheses

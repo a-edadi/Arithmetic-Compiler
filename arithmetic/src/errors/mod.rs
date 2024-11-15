@@ -16,11 +16,11 @@ pub enum CompilerError {
     MissingOperator(usize, usize),
 
     // Evaluation errors
-    EvalDivisionByZero,
-    IntegerOperatorWithFloatOperands,
-    UnsupportedBinaryOperator(String),
-    UnsupportedUnaryOperator(String),
-    UnsupportedFunction(String),
+    EvalDivisionByZero(usize),
+    IntegerOperatorWithFloatOperands(usize),
+    UnsupportedBinaryOperator(String, usize),
+    UnsupportedUnaryOperator(String, usize),
+    UnsupportedFunction(String, usize),
     TryEvalUnreachable(String),
 }
 
@@ -91,32 +91,44 @@ impl fmt::Display for CompilerError {
                     line, pos
                 )
             }
-            CompilerError::EvalDivisionByZero => {
+            CompilerError::EvalDivisionByZero(line) => {
                 write!(
                     f,
-                    "Runtime Error: Cannot evaluate expression due to division by zero."
+                    "Runtime Error: Cannot evaluate expression due to division by zero.  at line: {}" , line
                 )
             }
-            CompilerError::IntegerOperatorWithFloatOperands => {
+            CompilerError::IntegerOperatorWithFloatOperands(line) => {
                 write!(
                     f,
-                    "Runtime Error: Integer operators (Div or Mod) require integer operands only."
+                    "Runtime Error: Integer operators (Div or Mod) require integer operands only.  at line: {}" , line
                 )
             }
-            CompilerError::UnsupportedBinaryOperator(op) => {
-                write!(f, "Syntax Error: Unsupported binary operator '{}'.", op)
+            CompilerError::UnsupportedBinaryOperator(op, line) => {
+                write!(
+                    f,
+                    "Syntax Error: Unsupported binary operator '{}'. at line: {}",
+                    op, line
+                )
             }
-            CompilerError::UnsupportedUnaryOperator(op) => {
-                write!(f, "Syntax Error: Unsupported unary operator '{}'.", op)
+            CompilerError::UnsupportedUnaryOperator(op, line) => {
+                write!(
+                    f,
+                    "Syntax Error: Unsupported unary operator '{}'. at line {}",
+                    op, line
+                )
             }
-            CompilerError::UnsupportedFunction(func) => {
-                write!(f, "Syntax Error: Unsupported function '{}'.", func)
+            CompilerError::UnsupportedFunction(func, line) => {
+                write!(
+                    f,
+                    "Syntax Error: Unsupported function '{}'. at line {}",
+                    func, line
+                )
             }
             CompilerError::TryEvalUnreachable(s) => {
                 write!(
                     f,
-                    "Evaluation Error: Unable to evaluate expression without values. {}",
-                    s
+                    "Evaluation Error: Unable to evaluate expression without values. {} ",
+                    s,
                 )
             }
         }

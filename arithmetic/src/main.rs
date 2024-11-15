@@ -19,7 +19,7 @@ fn main() {
     {
         comment
     }
-    -2^2^3+X div 10-y1 mod  3+2.31+0.69+1.3E+2)";
+    -2^2^3+X div 10-y1 mod  3.5+2.31+0.69+1.3E+2)";
 
     ultimate_printer(input);
 }
