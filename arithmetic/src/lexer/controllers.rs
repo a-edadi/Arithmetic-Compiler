@@ -11,6 +11,9 @@ impl<'a> Lexer<'a> {
 
         if c == Some('\n') {
             self.line += 1;
+            self.column = 0
+        } else {
+            self.column += 1
         }
     }
 

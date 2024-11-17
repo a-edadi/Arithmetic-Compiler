@@ -16,6 +16,7 @@ pub struct Lexer<'a> {
     input: &'a str,
     current_pos: usize,
     line: usize,
+    column: usize,
     set_variable_values: bool,
     variables: HashMap<String, Num>,
 }
@@ -26,6 +27,7 @@ impl<'a> Lexer<'a> {
             input,
             current_pos: 0,
             line: 1,
+            column: 0,
             variables: HashMap::new(),
             set_variable_values: set_values,
         }
@@ -40,8 +42,13 @@ impl<'a> Lexer<'a> {
             let eof_char: char = '\0';
             return Ok(Token::new(
                 TokenKind::Eof,
-                TextSpan::new(self.current_pos, self.current_pos, eof_char.to_string()),
-                self.line,
+                TextSpan::new(
+                    self.current_pos,
+                    self.current_pos,
+                    eof_char.to_string(),
+                    self.line,
+                    self.column,
+                ),
             ));
         }
 
@@ -60,6 +67,7 @@ impl<'a> Lexer<'a> {
         // Define span start
         let start = self.current_pos;
         let line = self.line;
+        let column = self.column;
 
         // Check for line comments
         if c == '/' && self.peek_char() == Some('/') {
@@ -146,8 +154,8 @@ impl<'a> Lexer<'a> {
 
         let end = self.current_pos;
         let literal = self.input[start..end].to_string();
-        let span = TextSpan::new(start, end, literal);
+        let span = TextSpan::new(start, end, literal, line, column);
 
-        Ok(Token::new(kind, span, line))
+        Ok(Token::new(kind, span))
     }
 }

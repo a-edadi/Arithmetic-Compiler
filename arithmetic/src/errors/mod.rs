@@ -17,7 +17,7 @@ pub enum CompilerError {
 
     // Evaluation errors
     EvalDivisionByZero(usize),
-    IntegerOperatorWithFloatOperands(usize),
+    IntegerOperatorWithFloatOperands(usize, usize),
     UnsupportedBinaryOperator(String, usize),
     UnsupportedUnaryOperator(String, usize),
     UnsupportedFunction(String, usize),
@@ -97,10 +97,10 @@ impl fmt::Display for CompilerError {
                     "Runtime Error: Cannot evaluate expression due to division by zero.  at line: {}" , line
                 )
             }
-            CompilerError::IntegerOperatorWithFloatOperands(line) => {
+            CompilerError::IntegerOperatorWithFloatOperands(line, column) => {
                 write!(
                     f,
-                    "Runtime Error: Integer operators (Div or Mod) require integer operands only.  at line: {}" , line
+                    "Runtime Error: Integer operators (Div or Mod) require integer operands only.  at line: {}, column: {}" , line , column
                 )
             }
             CompilerError::UnsupportedBinaryOperator(op, line) => {

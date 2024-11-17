@@ -14,7 +14,7 @@ pub fn lex_parse_input(input: &str, use_variables: bool) -> Result<ASTNode, Stri
 /// Prints AST from the input
 pub fn print_ast(input: &str) {
     match lex_parse_input(input, false) {
-        Ok(ast) => println!("Ast Tree:\n{}", ast.to_string_tree("".to_string(), false)),
+        Ok(ast) => println!("Ast Tree:\n{}", ast.stringify("".to_string(), false)),
         Err(error) => eprintln!(" {}", error),
     }
 }
@@ -24,7 +24,7 @@ pub fn print_ast(input: &str) {
 /// replaces variables with actual values provided by the user
 pub fn print_ast_with_values(input: &str) {
     match lex_parse_input(input, true) {
-        Ok(ast) => println!("Ast Tree:\n{}", ast.to_string_tree("".to_string(), false)),
+        Ok(ast) => println!("Ast Tree:\n{}", ast.stringify("".to_string(), false)),
         Err(error) => eprintln!("{}", error),
     }
 }
