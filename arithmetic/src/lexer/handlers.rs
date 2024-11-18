@@ -82,6 +82,7 @@ impl<'a> Lexer<'a> {
 
         Ok(identifier)
     }
+
     pub fn handle_number(&mut self) -> Result<TokenKind, CompilerError> {
         let start_pos = self.current_pos;
         let mut number_str = String::new();
@@ -130,6 +131,7 @@ impl<'a> Lexer<'a> {
 
             // Ensure the scientific notation is valid
             if !has_exponent_digits {
+                // TODO: InvalidMantissa in the compiler error
                 return Err(CompilerError::InvalidNumber(
                     number_str, self.line, start_pos,
                 ));
@@ -139,7 +141,7 @@ impl<'a> Lexer<'a> {
         // Handle the parsed number
         if is_scientific {
             // Return scientific notation as a Mantiss token
-            Ok(TokenKind::Mantiss(number_str))
+            Ok(TokenKind::Mantissa(number_str))
         } else if has_dot {
             // Handle floating-point numbers
             match number_str.parse::<f64>() {

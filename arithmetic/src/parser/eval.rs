@@ -1,7 +1,9 @@
-use super::var::VariableManager;
+use super::var_manager::VariableManager;
 use super::{ASTNode, CompilerError, Num, TokenKind};
 
+use std::f64::consts::E;
 use std::f64::consts::PI;
+
 impl ASTNode {
     pub fn evaluate(&self, var_manager: &mut VariableManager) -> Result<f64, CompilerError> {
         match self {
@@ -93,23 +95,16 @@ impl ASTNode {
 
             ASTNode::Constant(token, _) => match token {
                 TokenKind::Pi => Ok(PI),
-                TokenKind::Euler => Ok(std::f64::consts::E),
+                TokenKind::Euler => Ok(E),
                 _ => Err(CompilerError::Unexpected()),
                 // invalid constant
             },
 
-            ASTNode::Mantiss(value, _) => match value.parse::<f64>() {
+            ASTNode::Mantissa(value, _) => match value.parse::<f64>() {
                 // invalid mantissa
                 Ok(parsed_value) => Ok(parsed_value),
                 Err(_) => Err(CompilerError::Unexpected()),
             },
-        }
-    }
-
-    pub fn eval_result(&self, var_manager: &mut VariableManager) -> String {
-        match self.evaluate(var_manager) {
-            Ok(result) => format!("Evaluation result: {}", result),
-            Err(e) => format!("{}", e),
         }
     }
 }

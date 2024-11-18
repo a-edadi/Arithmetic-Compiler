@@ -1,6 +1,5 @@
 pub mod comments;
 pub mod controllers;
-// pub mod get_values;
 pub mod handlers;
 pub mod print;
 pub mod span;
@@ -59,13 +58,13 @@ impl<'a> Lexer<'a> {
             }
         };
 
-        // Define span start
+        // Define Span values
         let start = self.current_pos;
         let line = self.line;
         let column = self.column;
 
         // Check for line comments
-        if c == '/' && self.peek_char() == Some('/') {
+        if c == '/' && self.peek() == Some('/') {
             self.handle_line_comment();
             return self.get_next_token();
         }
@@ -99,27 +98,30 @@ impl<'a> Lexer<'a> {
             let identifier_lower = identifier.to_lowercase();
 
             match identifier_lower.as_str() {
-                "f" => TokenKind::Func,
+                "f" => TokenKind::Func, // TODO
                 "sin" => TokenKind::Sin,
                 "cos" => TokenKind::Cos,
                 "tan" => TokenKind::Tan,
                 "cotan" => TokenKind::Cotan,
-                "arcsin" => TokenKind::ArcSin,
-                "arccos" => TokenKind::ArcCos,
-                "arctan" => TokenKind::ArcTan,
-                "arccotan" => TokenKind::ArcCotan,
+                "arcsin" => TokenKind::Arcsin,
+                "arccos" => TokenKind::Arccos,
+                "arctan" => TokenKind::Arctan,
+                "arccotan" => TokenKind::Arccotan,
                 "ln" => TokenKind::Ln,
                 "log" => TokenKind::Log,
                 "exp" => TokenKind::Exp,
                 "sqrt" => TokenKind::Sqrt,
                 "sqr" => TokenKind::Sqr,
+
+                // Div and Mod operators
+                // Handled here due to being alphabetic
                 "div" => TokenKind::Div,
                 "mod" => TokenKind::Mod,
 
                 // Constants
                 "e" => TokenKind::Euler,
                 "pi" => TokenKind::Pi,
-                // Identifiers: All are considered variable in this context
+
                 _ => TokenKind::Identifier(identifier),
             }
         } else if Self::is_ascii_start(&c) {

@@ -1,4 +1,6 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
+
+/// Provides meta data for the token
 pub struct TextSpan {
     pub start: usize,
     pub end: usize,

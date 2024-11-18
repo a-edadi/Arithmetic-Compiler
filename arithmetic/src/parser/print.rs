@@ -1,4 +1,5 @@
-use super::{var::VariableManager, ASTNode, Lexer, Parser};
+use super::{ASTNode, ASTWrapper, Lexer, Parser};
+
 /// Lex, Parse input and return AST
 pub fn lex_parse_input(input: &str) -> Result<ASTNode, String> {
     let lexer = Lexer::new(input);
@@ -26,9 +27,13 @@ pub fn print_postfix(input: &str) {
     }
 }
 
-pub fn print_evaluation(input: &str, var: &mut VariableManager) {
+/// Wrap the tree with AST for variable management
+pub fn print_evaluation(input: &str) {
     match lex_parse_input(input) {
-        Ok(ast) => println!("{}", ast.eval_result(var)),
+        Ok(ast) => {
+            let mut ast_tree = ASTWrapper::new(ast);
+            ast_tree.evaluate();
+        }
         Err(error) => eprintln!("{}", error),
     }
 }

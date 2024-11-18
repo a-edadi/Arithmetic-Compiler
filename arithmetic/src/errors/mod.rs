@@ -29,7 +29,7 @@ impl fmt::Display for CompilerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             CompilerError::Unexpected() => {
-                write!(f, "something unexpected happende at eval stage")
+                write!(f, "something unexpected happened at eval stage")
             }
             CompilerError::InvalidNumber(num, line, pos) => {
                 write!(
