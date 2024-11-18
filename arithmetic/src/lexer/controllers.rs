@@ -23,7 +23,7 @@ impl<'a> Lexer<'a> {
     }
 
     /// Returns the next char without moving the position of the lexer
-    pub fn peek_char(&self) -> Option<char> {
+    pub fn peek(&self) -> Option<char> {
         self.input.chars().nth(self.current_pos + 1)
     }
 
@@ -31,6 +31,7 @@ impl<'a> Lexer<'a> {
     pub fn reset(&mut self) {
         self.current_pos = 0;
         self.line = 1;
+        self.column = 0;
     }
 
     /// getter function. used by other modules

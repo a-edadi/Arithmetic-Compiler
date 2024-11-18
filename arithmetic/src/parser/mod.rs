@@ -1,7 +1,9 @@
 pub mod ast;
+pub mod ast_string;
 pub mod eval;
 pub mod postfix;
 pub mod print;
+pub mod var_manager;
 
 use crate::errors::CompilerError;
 use crate::lexer::{
@@ -9,7 +11,8 @@ use crate::lexer::{
     token::{Num, Token, TokenKind},
     Lexer,
 };
-use ast::ASTNode;
+use ast::{ASTNode, ASTWrapper};
+use var_manager::VariableManager;
 
 pub struct Parser<'a> {
     lexer: Lexer<'a>,
@@ -136,10 +139,10 @@ impl<'a> Parser<'a> {
             }
 
             // Handle Mantiss
-            TokenKind::Mantiss(mantiss_str) => {
+            TokenKind::Mantissa(mantiss_str) => {
                 let mantiss_value = mantiss_str.clone();
                 self.advance()?;
-                Ok(ASTNode::Mantiss(mantiss_value, span))
+                Ok(ASTNode::Mantissa(mantiss_value, span))
             }
 
             // Handle Euler's number(e)
@@ -159,10 +162,10 @@ impl<'a> Parser<'a> {
             | TokenKind::Cos
             | TokenKind::Tan
             | TokenKind::Cotan
-            | TokenKind::ArcSin
-            | TokenKind::ArcCos
-            | TokenKind::ArcTan
-            | TokenKind::ArcCotan
+            | TokenKind::Arcsin
+            | TokenKind::Arccos
+            | TokenKind::Arctan
+            | TokenKind::Arccotan
             | TokenKind::Ln
             | TokenKind::Log
             | TokenKind::Exp
@@ -201,10 +204,10 @@ impl<'a> Parser<'a> {
                     TokenKind::Cos => "cos",
                     TokenKind::Tan => "tan",
                     TokenKind::Cotan => "cotan",
-                    TokenKind::ArcSin => "arcsin",
-                    TokenKind::ArcCos => "arccos",
-                    TokenKind::ArcTan => "arctan",
-                    TokenKind::ArcCotan => "arccotan",
+                    TokenKind::Arcsin => "arcsin",
+                    TokenKind::Arccos => "arccos",
+                    TokenKind::Arctan => "arctan",
+                    TokenKind::Arccotan => "arccotan",
                     TokenKind::Ln => "ln",
                     TokenKind::Log => "log",
                     TokenKind::Exp => "exp",

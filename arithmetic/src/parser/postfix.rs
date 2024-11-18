@@ -14,7 +14,7 @@ impl ASTNode {
             }
 
             // Handle a mantissa node
-            ASTNode::Mantiss(mantiss_str, _) => {
+            ASTNode::Mantissa(mantiss_str, _) => {
                 format!("{} ", mantiss_str)
             }
 
@@ -30,22 +30,22 @@ impl ASTNode {
 
                 // Right-associative handling for exponentiation operator(^)
                 if *op == TokenKind::Power {
-                    result.push_str(&left.postfix()); // Left operand first
-                    result.push_str(&right.postfix()); // Right operand
+                    result.push_str(&left.postfix());
+                    result.push_str(&right.postfix());
                 } else {
                     // Left-associative order for other operators
-                    result.push_str(&left.postfix()); // Left operand
-                    result.push_str(&right.postfix()); // Right operand
+                    result.push_str(&left.postfix());
+                    result.push_str(&right.postfix());
                 }
 
-                result.push_str(&format!("{} ", op)); // Append operator
+                result.push_str(&format!("{} ", op));
                 result
             }
 
             // Handle a unary operation node: operator, operand
             ASTNode::UnaryOp(op, expr, _) => {
                 let mut result = expr.postfix(); // Operand
-                result.push_str(&format!("{} ", op)); // Append operator
+                result.push_str(&format!("{} ", op));
                 result
             }
 

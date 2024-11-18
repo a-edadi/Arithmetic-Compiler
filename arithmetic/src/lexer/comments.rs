@@ -1,6 +1,6 @@
 use super::Lexer;
 
-/// Exclude the rest of the line when // is seen
+/// Double slash comments
 impl<'a> Lexer<'a> {
     pub fn handle_line_comment(&mut self) {
         while let Some(c) = self.current_char() {
@@ -11,12 +11,12 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    // handle block comments
+    // Block comments {}
     pub fn handle_block_comment(&mut self) {
-        self.advance(); // Skip the initial '{'
+        self.advance();
         while let Some(c) = self.current_char() {
             if c == '}' {
-                self.advance(); // Skip the closing '}'
+                self.advance();
                 break;
             }
             self.advance();

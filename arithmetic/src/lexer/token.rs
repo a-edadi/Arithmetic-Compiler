@@ -12,46 +12,46 @@ pub enum Num {
 pub enum TokenKind {
     // Literals
     Number(Num),
-    Mantiss(String),
+    Mantissa(String),
 
     // Identifier
     Func,
     Identifier(String),
 
     // Operators
-    Plus,     // Addition operator: +
-    Minus,    // Subtraction operator: -
-    Multiply, // Multiplication operator: *
-    Divide,   // Division operator: /
-    Div,      // Integer division operator: div
-    Mod,      // Modulo operator: mod
-    Power,    // Exponentiation operator: ^
+    Plus,
+    Minus,
+    Multiply,
+    Divide,
+    Div,
+    Mod,
+    Power,
 
     // Separators and precedence
-    LeftParen,  // (
-    RightParen, // )
+    LeftParen,
+    RightParen,
 
     // Mathematical functions
-    Sin,      // Sine function: sin
-    Cos,      // Cosine function: cos
-    Tan,      // Tangent function: tan
-    Cotan,    // Cotangent function: cotan
-    ArcSin,   // Inverse sine function: arcsin
-    ArcCos,   // Inverse cosine function: arccos
-    ArcTan,   // Inverse tangent function: arctan
-    ArcCotan, // Inverse cotangent function: arccotan
-    Ln,       // Natural logarithm function: ln
-    Log,      // Base-10 logarithm function: log
-    Exp,      // Exponential function: exp(x) = e^x
-    Sqrt,     // Square root function: sqrt(x) = √x
-    Sqr,      // Squaring function: sqr(x) = x^2
+    Sin,
+    Cos,
+    Tan,
+    Cotan,
+    Arcsin, // Standardized capitalization
+    Arccos,
+    Arctan,
+    Arccotan,
+    Ln,
+    Log,
+    Exp,
+    Sqrt,
+    Sqr,
 
     // Constants
-    Euler, // Euler's number: e
-    Pi,    // Pi: π
+    Euler,
+    Pi,
 
     // Other
-    Eof, // End of file/input marker
+    Eof,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -72,8 +72,9 @@ impl fmt::Display for Token {
         write!(
             f,
             // "Token: {:?}\n  Span: {:?}\n  Literal: \"{}\" \n", // Prettier
-            "Token: {:?} Span: {:?}  Literal: \"{}\"", // Just like debug print, Minimal space.
-            self.kind, self.span, self.span.literal
+            // "Token: {:?} Span: {:?}  Literal: \"{}\"", // Just like debug print, Minimal space.
+            "Token: {:?}  Literal: \"{}\"",
+            self.kind, self.span.literal
         )
     }
 }
@@ -82,7 +83,7 @@ impl fmt::Display for Num {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Num::Integer(i) => write!(f, "Integer({})", i),
-            Num::Float(fl) => write!(f, "Float({})", fl),
+            Num::Float(fl) => write!(f, "Float({:.5})", fl),
         }
     }
 }
@@ -106,19 +107,19 @@ impl fmt::Display for TokenKind {
             TokenKind::Cos => write!(f, "Cos"),
             TokenKind::Tan => write!(f, "Tan"),
             TokenKind::Cotan => write!(f, "Cotan"),
-            TokenKind::ArcSin => write!(f, "ArcSin"),
-            TokenKind::ArcCos => write!(f, "ArcCos"),
-            TokenKind::ArcTan => write!(f, "ArcTan"),
-            TokenKind::ArcCotan => write!(f, "ArcCotan"),
+            TokenKind::Arcsin => write!(f, "ArcSin"),
+            TokenKind::Arccos => write!(f, "ArcCos"),
+            TokenKind::Arctan => write!(f, "ArcTan"),
+            TokenKind::Arccotan => write!(f, "ArcCotan"),
             TokenKind::Ln => write!(f, "Ln"),
             TokenKind::Log => write!(f, "Log"),
             TokenKind::Exp => write!(f, "Exp"),
             TokenKind::Sqrt => write!(f, "Sqrt"),
             TokenKind::Sqr => write!(f, "Sqr"),
-            TokenKind::Mantiss(num_str) => write!(f, "{}", num_str),
+            TokenKind::Mantissa(num_str) => write!(f, "{}", num_str),
             TokenKind::Euler => write!(f, "e"),
             TokenKind::Pi => write!(f, "π"),
-            TokenKind::Eof => write!(f, "Eof"),
+            TokenKind::Eof => write!(f, "End of Input"),
         }
     }
 }

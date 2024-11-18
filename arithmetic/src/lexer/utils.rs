@@ -21,18 +21,12 @@ impl<'a> Lexer<'a> {
     }
 
     /// Lexes all tokens and returns a formatted string representation of the input
-    pub fn lex_string(&mut self) -> Result<String, CompilerError> {
-        let tokens_result = self.lex_all();
-
-        match tokens_result {
-            Ok(tokens) => {
-                let mut result = String::new();
-                for token in tokens {
-                    result.push_str(&format!("{}\n", token));
-                }
-                Ok(result)
-            }
-            Err(e) => Err(e),
-        }
+    pub fn stringify(&mut self) -> Result<String, CompilerError> {
+        self.lex_all().map(|tokens| {
+            tokens
+                .iter()
+                .map(|token| format!("{}\n", token))
+                .collect::<String>()
+        })
     }
 }

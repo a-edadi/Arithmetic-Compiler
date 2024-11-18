@@ -1,19 +1,28 @@
-use super::{Lexer, Num};
+use super::Num;
+use std::collections::HashMap;
 use std::io::{self, Write};
 
-impl<'a> Lexer<'a> {
-    /// Gets the values from where ever
-    /// TODO: Make it generic
+pub struct VariableManager {
+    variables: HashMap<String, Num>,
+}
+
+impl VariableManager {
+    pub fn new() -> Self {
+        Self {
+            variables: HashMap::new(),
+        }
+    }
+
     pub fn get_variable_value(&mut self, var_name: &str) -> Num {
-        // If the variable exists -> return its value if not prompt to get the value
-        if let Some(value) = self.variables.get(var_name) {
+        let normalized_name = var_name.to_lowercase();
+
+        if let Some(value) = self.variables.get(&normalized_name) {
             return value.clone();
         }
 
-        self.prompt_terminal_for_variable_value(var_name)
+        self.prompt_terminal_for_variable_value(&normalized_name)
     }
 
-    // Helper function to handle prompting for a value in the terminal
     fn prompt_terminal_for_variable_value(&mut self, var_name: &str) -> Num {
         println!("Enter value for variable '{}':", var_name);
 
@@ -23,7 +32,6 @@ impl<'a> Lexer<'a> {
             io::stdout().flush().unwrap();
             io::stdin().read_line(&mut input).unwrap();
 
-            // Trim input and determine if it's an integer or float
             let trimmed_input = input.trim();
             if trimmed_input.contains('.') {
                 match trimmed_input.parse::<f64>() {

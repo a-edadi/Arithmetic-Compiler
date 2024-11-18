@@ -1,6 +1,5 @@
 pub mod comments;
 pub mod controllers;
-pub mod get_values;
 pub mod handlers;
 pub mod print;
 pub mod span;
@@ -9,7 +8,6 @@ pub mod utils;
 
 use crate::errors::CompilerError;
 use span::TextSpan;
-use std::collections::HashMap;
 use token::{Num, Token, TokenKind};
 
 pub struct Lexer<'a> {
@@ -17,19 +15,15 @@ pub struct Lexer<'a> {
     current_pos: usize,
     line: usize,
     column: usize,
-    set_variable_values: bool,
-    variables: HashMap<String, Num>,
 }
 
 impl<'a> Lexer<'a> {
-    pub fn new(input: &'a str, set_values: bool) -> Self {
+    pub fn new(input: &'a str) -> Self {
         Self {
             input,
             current_pos: 0,
             line: 1,
             column: 0,
-            variables: HashMap::new(),
-            set_variable_values: set_values,
         }
     }
 
@@ -64,13 +58,13 @@ impl<'a> Lexer<'a> {
             }
         };
 
-        // Define span start
+        // Define Span values
         let start = self.current_pos;
         let line = self.line;
         let column = self.column;
 
         // Check for line comments
-        if c == '/' && self.peek_char() == Some('/') {
+        if c == '/' && self.peek() == Some('/') {
             self.handle_line_comment();
             return self.get_next_token();
         }
@@ -104,47 +98,31 @@ impl<'a> Lexer<'a> {
             let identifier_lower = identifier.to_lowercase();
 
             match identifier_lower.as_str() {
-                "f" => TokenKind::Func,
+                "f" => TokenKind::Func, // TODO
                 "sin" => TokenKind::Sin,
                 "cos" => TokenKind::Cos,
                 "tan" => TokenKind::Tan,
                 "cotan" => TokenKind::Cotan,
-                "arcsin" => TokenKind::ArcSin,
-                "arccos" => TokenKind::ArcCos,
-                "arctan" => TokenKind::ArcTan,
-                "arccotan" => TokenKind::ArcCotan,
+                "arcsin" => TokenKind::Arcsin,
+                "arccos" => TokenKind::Arccos,
+                "arctan" => TokenKind::Arctan,
+                "arccotan" => TokenKind::Arccotan,
                 "ln" => TokenKind::Ln,
                 "log" => TokenKind::Log,
                 "exp" => TokenKind::Exp,
                 "sqrt" => TokenKind::Sqrt,
                 "sqr" => TokenKind::Sqr,
+
+                // Div and Mod operators
+                // Handled here due to being alphabetic
                 "div" => TokenKind::Div,
                 "mod" => TokenKind::Mod,
 
                 // Constants
-                "e" => {
-                    if self.set_variable_values {
-                        TokenKind::Number(Num::Float(std::f64::consts::E))
-                    } else {
-                        TokenKind::Euler
-                    }
-                }
-                "pi" => {
-                    if self.set_variable_values {
-                        TokenKind::Number(Num::Float(std::f64::consts::PI))
-                    } else {
-                        TokenKind::Pi
-                    }
-                }
-                // Identifiers: All are considered variable in this context
-                _ => {
-                    if self.set_variable_values {
-                        let value = self.get_variable_value(&identifier_lower);
-                        TokenKind::Number(value)
-                    } else {
-                        TokenKind::Identifier(identifier)
-                    }
-                }
+                "e" => TokenKind::Euler,
+                "pi" => TokenKind::Pi,
+
+                _ => TokenKind::Identifier(identifier),
             }
         } else if Self::is_ascii_start(&c) {
             self.handle_punctuation()?

@@ -21,13 +21,16 @@ pub enum CompilerError {
     UnsupportedBinaryOperator(String, usize),
     UnsupportedUnaryOperator(String, usize),
     UnsupportedFunction(String, usize),
-    TryEvalUnreachable(String),
+    Unexpected(),
 }
 
 // Implement Display for CompilerError to provide descriptive error messages
 impl fmt::Display for CompilerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            CompilerError::Unexpected() => {
+                write!(f, "something unexpected happened at eval stage")
+            }
             CompilerError::InvalidNumber(num, line, pos) => {
                 write!(
                     f,
@@ -122,13 +125,6 @@ impl fmt::Display for CompilerError {
                     f,
                     "Syntax Error: Unsupported function '{}'. at line {}",
                     func, line
-                )
-            }
-            CompilerError::TryEvalUnreachable(s) => {
-                write!(
-                    f,
-                    "Evaluation Error: Unable to evaluate expression without values. {} ",
-                    s,
                 )
             }
         }
