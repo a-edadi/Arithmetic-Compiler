@@ -21,7 +21,7 @@ impl<'a> Lexer<'a> {
     }
 
     /// Lexes all tokens and returns a formatted string representation of the input
-    pub fn lex_string(&mut self) -> Result<String, CompilerError> {
+    pub fn stringify(&mut self) -> Result<String, CompilerError> {
         let tokens_result = self.lex_all();
 
         match tokens_result {

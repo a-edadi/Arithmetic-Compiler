@@ -72,8 +72,9 @@ impl fmt::Display for Token {
         write!(
             f,
             // "Token: {:?}\n  Span: {:?}\n  Literal: \"{}\" \n", // Prettier
-            "Token: {:?} Span: {:?}  Literal: \"{}\"", // Just like debug print, Minimal space.
-            self.kind, self.span, self.span.literal
+            // "Token: {:?} Span: {:?}  Literal: \"{}\"", // Just like debug print, Minimal space.
+            "Token: {:?}  Literal: \"{}\"", // Just like debug print, Minimal space.
+            self.kind, self.span.literal
         )
     }
 }

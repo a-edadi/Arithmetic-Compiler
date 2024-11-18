@@ -2,6 +2,7 @@ pub mod ast;
 pub mod eval;
 pub mod postfix;
 pub mod print;
+pub mod var;
 
 use crate::errors::CompilerError;
 use crate::lexer::{

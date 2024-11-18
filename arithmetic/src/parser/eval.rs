@@ -1,19 +1,23 @@
+use super::var::VariableManager;
 use super::{ASTNode, CompilerError, Num, TokenKind};
 
 use std::f64::consts::PI;
-
-/// Recursively evaluates the AST and return Number
 impl ASTNode {
-    pub fn evaluate(&self) -> Result<f64, CompilerError> {
+    pub fn evaluate(&self, var_manager: &mut VariableManager) -> Result<f64, CompilerError> {
         match self {
+            ASTNode::Identifier(id, _) => match var_manager.get_variable_value(id) {
+                Num::Integer(i) => Ok(i as f64),
+                Num::Float(f) => Ok(f),
+            },
+
             ASTNode::Number(n, _) => match n {
                 Num::Integer(i) => Ok(*i as f64),
                 Num::Float(f) => Ok(*f),
             },
 
             ASTNode::BinaryOp(left, op, right, span) => {
-                let left_val = left.evaluate()?; // Recursively evaluate left operand
-                let right_val = right.evaluate()?; // Recursively evaluate right operand
+                let left_val = left.evaluate(var_manager)?; // Recursively evaluate left operand
+                let right_val = right.evaluate(var_manager)?; // Recursively evaluate right operand
                 match op {
                     TokenKind::Plus => Ok(left_val + right_val),
                     TokenKind::Minus => Ok(left_val - right_val),
@@ -26,7 +30,6 @@ impl ASTNode {
                         }
                     }
                     TokenKind::Mod => {
-                        // Ensure both left and right values are integers for modulus
                         if left_val.fract() != 0.0 || right_val.fract() != 0.0 {
                             Err(CompilerError::IntegerOperatorWithFloatOperands(
                                 span.line,
@@ -37,7 +40,6 @@ impl ASTNode {
                         }
                     }
                     TokenKind::Div => {
-                        // Ensure both left and right values are integers for integer division
                         if left_val.fract() != 0.0 || right_val.fract() != 0.0 {
                             Err(CompilerError::IntegerOperatorWithFloatOperands(
                                 span.line,
@@ -49,7 +51,7 @@ impl ASTNode {
                             Ok((left_val / right_val).floor())
                         }
                     }
-                    TokenKind::Power => Ok(left_val.powf(right_val)), // Exponentiation
+                    TokenKind::Power => Ok(left_val.powf(right_val)),
                     _ => Err(CompilerError::UnsupportedBinaryOperator(
                         op.to_string(),
                         span.line,
@@ -58,7 +60,7 @@ impl ASTNode {
             }
 
             ASTNode::UnaryOp(op, expr, span) => {
-                let expr_val = expr.evaluate()?;
+                let expr_val = expr.evaluate(var_manager)?;
                 match op {
                     TokenKind::Minus => Ok(-expr_val),
                     TokenKind::Plus => Ok(expr_val),
@@ -70,7 +72,7 @@ impl ASTNode {
             }
 
             ASTNode::FunctionCall(func, arg, span) => {
-                let arg_val = arg.evaluate()?; // Evaluate argument
+                let arg_val = arg.evaluate(var_manager)?;
                 match func.as_str() {
                     "sin" => Ok(arg_val.to_radians().sin()),
                     "cos" => Ok(arg_val.to_radians().cos()),
@@ -89,18 +91,23 @@ impl ASTNode {
                 }
             }
 
-            // Unreachable nodes
-            ASTNode::Constant(_, _) => {
-                Err(CompilerError::TryEvalUnreachable("Constants".to_string()))
-            }
-            ASTNode::Mantiss(_, _) => Err(CompilerError::TryEvalUnreachable("Mantiss".to_string())),
-            ASTNode::Identifier(id, _) => Err(CompilerError::TryEvalUnreachable(id.to_string())),
+            ASTNode::Constant(token, _) => match token {
+                TokenKind::Pi => Ok(PI),
+                TokenKind::Euler => Ok(std::f64::consts::E),
+                _ => Err(CompilerError::Unexpected()),
+                // invalid constant
+            },
+
+            ASTNode::Mantiss(value, _) => match value.parse::<f64>() {
+                // invalid mantissa
+                Ok(parsed_value) => Ok(parsed_value),
+                Err(_) => Err(CompilerError::Unexpected()),
+            },
         }
     }
 
-    /// wrapper for the implementation above.
-    pub fn eval_result(&self) -> String {
-        match self.evaluate() {
+    pub fn eval_result(&self, var_manager: &mut VariableManager) -> String {
+        match self.evaluate(var_manager) {
             Ok(result) => format!("Evaluation result: {}", result),
             Err(e) => format!("{}", e),
         }

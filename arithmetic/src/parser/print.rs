@@ -1,8 +1,7 @@
-use super::{ASTNode, Lexer, Parser};
-
+use super::{var::VariableManager, ASTNode, Lexer, Parser};
 /// Lex, Parse input and return AST
-pub fn lex_parse_input(input: &str, use_variables: bool) -> Result<ASTNode, String> {
-    let lexer = Lexer::new(input, use_variables);
+pub fn lex_parse_input(input: &str) -> Result<ASTNode, String> {
+    let lexer = Lexer::new(input);
 
     let mut parser = Parser::new(lexer).unwrap();
     match parser.parse_expression() {
@@ -13,34 +12,23 @@ pub fn lex_parse_input(input: &str, use_variables: bool) -> Result<ASTNode, Stri
 
 /// Prints AST from the input
 pub fn print_ast(input: &str) {
-    match lex_parse_input(input, false) {
+    match lex_parse_input(input) {
         Ok(ast) => println!("Ast Tree:\n{}", ast.stringify("".to_string(), false)),
         Err(error) => eprintln!(" {}", error),
     }
 }
 
-#[allow(dead_code)]
-/// Prints AST from the input
-/// replaces variables with actual values provided by the user
-pub fn print_ast_with_values(input: &str) {
-    match lex_parse_input(input, true) {
-        Ok(ast) => println!("Ast Tree:\n{}", ast.stringify("".to_string(), false)),
-        Err(error) => eprintln!("{}", error),
-    }
-}
-
 /// Prints the Postfix notation of the AST Tree
 pub fn print_postfix(input: &str) {
-    match lex_parse_input(input, false) {
+    match lex_parse_input(input) {
         Ok(ast) => println!("Postfix Notation: {}", ast.postfix()),
         Err(error) => eprintln!("{}", error),
     }
 }
 
-/// Prints the final result of the AST tree evaluation.
-pub fn print_evaluation(input: &str) {
-    match lex_parse_input(input, true) {
-        Ok(ast) => println!("{}", ast.eval_result()),
+pub fn print_evaluation(input: &str, var: &mut VariableManager) {
+    match lex_parse_input(input) {
+        Ok(ast) => println!("{}", ast.eval_result(var)),
         Err(error) => eprintln!("{}", error),
     }
 }

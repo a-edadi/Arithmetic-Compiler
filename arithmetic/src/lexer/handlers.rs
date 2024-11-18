@@ -82,13 +82,12 @@ impl<'a> Lexer<'a> {
 
         Ok(identifier)
     }
-
-    /// Handles Number: floats, Integers and Mantiss
     pub fn handle_number(&mut self) -> Result<TokenKind, CompilerError> {
         let start_pos = self.current_pos;
         let mut number_str = String::new();
         let mut has_dot = false;
 
+        // Parse the main number part (digits with optional dot)
         while let Some(c) = self.current_char() {
             if c.is_ascii_digit() {
                 number_str.push(c);
@@ -102,12 +101,14 @@ impl<'a> Lexer<'a> {
             }
         }
 
-        // Check for scientific notation: Mantiss(E)
+        // Check for scientific notation (e.g., 1.3E+2)
+        let mut is_scientific = false;
         if let Some('E') = self.current_char() {
-            number_str.push('E'); // Add E to the number string
-            self.advance(); // Move past 'E'
+            number_str.push('E'); // Include 'E' in the number string
+            self.advance();
+            is_scientific = true;
 
-            // Mantiss sign: E+2 or E-2
+            // Optional sign after 'E'
             if let Some(sign) = self.current_char() {
                 if sign == '+' || sign == '-' {
                     number_str.push(sign);
@@ -115,38 +116,46 @@ impl<'a> Lexer<'a> {
                 }
             }
 
-            // Parse the exponent digits
+            // Parse exponent digits
+            let mut has_exponent_digits = false;
             while let Some(c) = self.current_char() {
                 if c.is_ascii_digit() {
                     number_str.push(c);
+                    has_exponent_digits = true;
                     self.advance();
                 } else {
                     break;
                 }
             }
+
+            // Ensure the scientific notation is valid
+            if !has_exponent_digits {
+                return Err(CompilerError::InvalidNumber(
+                    number_str, self.line, start_pos,
+                ));
+            }
         }
 
-        // Return based on set_values
-        if self.set_variable_values {
-            // parse the full number as a float or integer
-            if has_dot || number_str.contains('E') {
-                match number_str.parse::<f64>() {
-                    Ok(float_num) => Ok(TokenKind::Number(Num::Float(float_num))),
-                    Err(_) => Err(CompilerError::InvalidNumber(
-                        number_str, self.line, start_pos,
-                    )),
-                }
-            } else {
-                match number_str.parse::<i64>() {
-                    Ok(int_num) => Ok(TokenKind::Number(Num::Integer(int_num))),
-                    Err(_) => Err(CompilerError::InvalidNumber(
-                        number_str, self.line, start_pos,
-                    )),
-                }
+        // Handle the parsed number
+        if is_scientific {
+            // Return scientific notation as a Mantiss token
+            Ok(TokenKind::Mantiss(number_str))
+        } else if has_dot {
+            // Handle floating-point numbers
+            match number_str.parse::<f64>() {
+                Ok(float_num) => Ok(TokenKind::Number(Num::Float(float_num))),
+                Err(_) => Err(CompilerError::InvalidNumber(
+                    number_str, self.line, start_pos,
+                )),
             }
         } else {
-            // If set_values is false, store as a string mantissa
-            Ok(TokenKind::Mantiss(number_str))
+            // Handle integers
+            match number_str.parse::<i64>() {
+                Ok(int_num) => Ok(TokenKind::Number(Num::Integer(int_num))),
+                Err(_) => Err(CompilerError::InvalidNumber(
+                    number_str, self.line, start_pos,
+                )),
+            }
         }
     }
 }
