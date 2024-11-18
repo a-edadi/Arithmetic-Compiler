@@ -48,7 +48,7 @@ impl<'a> Lexer<'a> {
             _ => Err(CompilerError::InvalidCharacter(
                 c,
                 self.line,
-                self.current_pos - 1,
+                self.pos - 1,
             )),
         }
     }
@@ -60,9 +60,9 @@ impl<'a> Lexer<'a> {
         // Ensure the first character is valid for the start of an identifier
         if let Some(c) = self.current_char() {
             if c.is_digit(10) {
-                return Err(CompilerError::InvalidIdentifierStart(
+                return Err(CompilerError::InvalidIdentifier(
                     self.line,
-                    self.current_pos,
+                    self.pos,
                 ));
             } else if Self::is_identifier_start(&c) {
                 identifier.push(c);
@@ -84,7 +84,7 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn handle_number(&mut self) -> Result<TokenKind, CompilerError> {
-        let start_pos = self.current_pos;
+        let start_pos = self.pos;
         let mut number_str = String::new();
         let mut has_dot = false;
 

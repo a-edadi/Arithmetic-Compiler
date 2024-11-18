@@ -75,7 +75,7 @@ impl<'a> Parser<'a> {
                 if let ASTNode::Number(Num::Integer(0), _) | ASTNode::Number(Num::Float(0.0), _) =
                     &right_node
                 {
-                    return Err(CompilerError::DivisionByZero(self.lexer.get_position()));
+                    return Err(CompilerError::DivisionByZero(self.lexer.pos));
                 }
             }
 
@@ -130,8 +130,8 @@ impl<'a> Parser<'a> {
                 // Check if the next token is also a number without an operator between them
                 if let TokenKind::Number(_) = self.current_token.kind {
                     return Err(CompilerError::MissingOperator(
-                        self.lexer.get_line(),
-                        self.lexer.get_position(),
+                        self.lexer.line,
+                        self.lexer.pos,
                     ));
                 }
 
@@ -179,8 +179,8 @@ impl<'a> Parser<'a> {
                 // if there is no left paren Raise error, we are expecting LeftParen
                 if self.current_token.kind != TokenKind::LeftParen {
                     return Err(CompilerError::MissingLParen(
-                        self.lexer.get_position(),
-                        self.lexer.get_line(),
+                        self.lexer.pos,
+                        self.lexer.line,
                     ));
                 }
 
@@ -192,8 +192,8 @@ impl<'a> Parser<'a> {
                 // after parsing the inner expression we are looking for ) RightParen
                 if self.current_token.kind != TokenKind::RightParen {
                     return Err(CompilerError::MissingRParen(
-                        self.lexer.get_line(),
-                        self.lexer.get_position(),
+                        self.lexer.line,
+                        self.lexer.pos,
                     ));
                 }
 
@@ -216,8 +216,8 @@ impl<'a> Parser<'a> {
                     _ => {
                         return Err(CompilerError::UnexpectedToken(
                             self.current_token.kind.clone(),
-                            self.lexer.get_position(),
-                            self.lexer.get_line(),
+                            self.lexer.pos,
+                            self.lexer.line,
                         ))
                     }
                 };
@@ -243,8 +243,8 @@ impl<'a> Parser<'a> {
                 let node = self.parse_expression()?;
                 if self.current_token.kind != TokenKind::RightParen {
                     return Err(CompilerError::MissingRParen(
-                        self.lexer.get_line(),
-                        self.lexer.get_position(),
+                        self.lexer.line,
+                        self.lexer.pos,
                     ));
                 }
                 self.advance()?; // Skip ')'
@@ -253,15 +253,15 @@ impl<'a> Parser<'a> {
 
             // handle single right paren, Missing left paren
             TokenKind::RightParen => Err(CompilerError::MissingLParen(
-                self.lexer.get_line(),
-                self.lexer.get_position(),
+                self.lexer.line,
+                self.lexer.pos,
             )),
 
             // Unexpected token
             _ => Err(CompilerError::UnexpectedToken(
                 self.current_token.kind.clone(),
-                self.lexer.get_position(),
-                self.lexer.get_line(),
+                self.lexer.pos,
+                self.lexer.line,
             )),
         }
     }

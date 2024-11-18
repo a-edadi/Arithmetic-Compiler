@@ -3,10 +3,10 @@ use std::{fmt, usize};
 
 #[derive(Debug, PartialEq)]
 pub enum CompilerError {
-    InvalidCharacter(char, usize, usize),
     InvalidNumber(String, usize, usize),
+    InvalidCharacter(char, usize, usize),
     UnexpectedError(usize, usize),
-    InvalidIdentifierStart(usize, usize),
+    InvalidIdentifier(usize, usize),
 
     // Parser Errors
     UnexpectedToken(TokenKind, usize, usize),
@@ -21,16 +21,14 @@ pub enum CompilerError {
     UnsupportedBinaryOperator(String, usize),
     UnsupportedUnaryOperator(String, usize),
     UnsupportedFunction(String, usize),
-    Unexpected(),
+    Unexpected,
 }
 
 // Implement Display for CompilerError to provide descriptive error messages
 impl fmt::Display for CompilerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            CompilerError::Unexpected() => {
-                write!(f, "something unexpected happened at eval stage")
-            }
+            // Lexer Errors
             CompilerError::InvalidNumber(num, line, pos) => {
                 write!(
                     f,
@@ -52,13 +50,15 @@ impl fmt::Display for CompilerError {
                     line, pos
                 )
             }
-            CompilerError::InvalidIdentifierStart(line, pos) => {
+            CompilerError::InvalidIdentifier(line, pos) => {
                 write!(
                     f,
                     "Syntax Error: Identifier cannot start with a number, found at line {}, position {}.",
                     line, pos
                 )
             }
+
+            // Parser
             CompilerError::UnexpectedToken(kind, line, pos) => {
                 write!(
                     f,
@@ -126,6 +126,9 @@ impl fmt::Display for CompilerError {
                     "Syntax Error: Unsupported function '{}'. at line {}",
                     func, line
                 )
+            }
+            CompilerError::Unexpected => {
+                write!(f, "something unexpected happened at eval stage")
             }
         }
     }

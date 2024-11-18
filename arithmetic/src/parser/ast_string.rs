@@ -56,7 +56,7 @@ impl ASTNode {
                 result
             }
 
-            // Formatting a unary operation node: -x
+            // Formatting a unary operation node: -x,-1 ,+2
             ASTNode::UnaryOp(op, expr, _) => {
                 let mut result = format!(
                     "{}{}{}\n",
@@ -69,7 +69,7 @@ impl ASTNode {
                 result
             }
 
-            // Formatting a function call node: sin(x), sqrt(x)
+            // Formatting a function call node: sin(x), sqrt(x), ...
             ASTNode::FunctionCall(func, arg, _) => {
                 let mut result = format!(
                     "{}{}{}\n",

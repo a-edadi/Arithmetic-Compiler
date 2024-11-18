@@ -71,10 +71,8 @@ impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            // "Token: {:?}\n  Span: {:?}\n  Literal: \"{}\" \n", // Prettier
-            // "Token: {:?} Span: {:?}  Literal: \"{}\"", // Just like debug print, Minimal space.
-            "Token: {:?}  Literal: \"{}\"",
-            self.kind, self.span.literal
+            "Token: {:?}\n  Span: {:?}\n", 
+            self.kind, self.span
         )
     }
 }

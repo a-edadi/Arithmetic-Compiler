@@ -1,5 +1,6 @@
 use super::{CompilerError, Lexer, Token, TokenKind};
 
+// Utilities used only for lexing(Can not be used with parser)
 impl<'a> Lexer<'a> {
     /// lexes all tokens and returns a vector of theses tokens
     pub fn lex_all(&mut self) -> Result<Vec<Token>, CompilerError> {

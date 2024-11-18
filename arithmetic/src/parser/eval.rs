@@ -96,14 +96,14 @@ impl ASTNode {
             ASTNode::Constant(token, _) => match token {
                 TokenKind::Pi => Ok(PI),
                 TokenKind::Euler => Ok(E),
-                _ => Err(CompilerError::Unexpected()),
+                _ => Err(CompilerError::Unexpected),
                 // invalid constant
             },
 
             ASTNode::Mantissa(value, _) => match value.parse::<f64>() {
                 // invalid mantissa
                 Ok(parsed_value) => Ok(parsed_value),
-                Err(_) => Err(CompilerError::Unexpected()),
+                Err(_) => Err(CompilerError::Unexpected),
             },
         }
     }

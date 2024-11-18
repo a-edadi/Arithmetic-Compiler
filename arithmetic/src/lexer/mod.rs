@@ -12,8 +12,8 @@ use token::{Num, Token, TokenKind};
 
 pub struct Lexer<'a> {
     input: &'a str,
-    current_pos: usize,
-    line: usize,
+    pub pos: usize,
+    pub line: usize,
     column: usize,
 }
 
@@ -21,7 +21,7 @@ impl<'a> Lexer<'a> {
     pub fn new(input: &'a str) -> Self {
         Self {
             input,
-            current_pos: 0,
+            pos: 0,
             line: 1,
             column: 0,
         }
@@ -32,13 +32,13 @@ impl<'a> Lexer<'a> {
         self.skip_whitespace();
 
         // Ensure that the lexer is in bound and not lexing out of range
-        if self.current_pos >= self.input.len() {
+        if self.pos >= self.input.len() {
             let eof_char: char = '\0';
             return Ok(Token::new(
                 TokenKind::Eof,
                 TextSpan::new(
-                    self.current_pos,
-                    self.current_pos,
+                    self.pos,
+                    self.pos,
                     eof_char.to_string(),
                     self.line,
                     self.column,
@@ -46,20 +46,14 @@ impl<'a> Lexer<'a> {
             ));
         }
 
-        // fetch teh current char
+        // fetch the current char
         let c = match self.current_char() {
             Some(ch) => ch,
-            None => {
-                return Err(CompilerError::InvalidCharacter(
-                    '\0',
-                    self.line,
-                    self.current_pos,
-                ))
-            }
+            None => return Err(CompilerError::InvalidCharacter('\0', self.line, self.pos)),
         };
 
         // Define Span values
-        let start = self.current_pos;
+        let start = self.pos;
         let line = self.line;
         let column = self.column;
 
@@ -79,15 +73,12 @@ impl<'a> Lexer<'a> {
         let kind = if Self::is_number_start(&c) {
             let number_kind = self
                 .handle_number()
-                .map_err(|_| CompilerError::UnexpectedError(self.line, self.current_pos))?;
+                .map_err(|_| CompilerError::UnexpectedError(self.line, self.pos))?;
 
             // If the next character is part of an identifier -> Raise Error
             if let Some(next_char) = self.current_char() {
                 if Self::is_identifier_start(&next_char) {
-                    return Err(CompilerError::InvalidIdentifierStart(
-                        self.line,
-                        self.current_pos,
-                    ));
+                    return Err(CompilerError::InvalidIdentifier(self.line, self.pos));
                 }
             }
 
@@ -127,10 +118,10 @@ impl<'a> Lexer<'a> {
         } else if Self::is_ascii_start(&c) {
             self.handle_punctuation()?
         } else {
-            return Err(CompilerError::UnexpectedError(self.line, self.current_pos));
+            return Err(CompilerError::UnexpectedError(self.line, self.pos));
         };
 
-        let end = self.current_pos;
+        let end = self.pos;
         let literal = self.input[start..end].to_string();
         let span = TextSpan::new(start, end, literal, line, column);
 
