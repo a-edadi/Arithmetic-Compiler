@@ -70,15 +70,6 @@ impl<'a> Parser<'a> {
             self.advance()?;
             let right_node = self.parse_exponentiation()?;
 
-            // Handle division by zero for both integer and float cases
-            if let TokenKind::Divide | TokenKind::Div = &op {
-                if let ASTNode::Number(Num::Integer(0), _) | ASTNode::Number(Num::Float(0.0), _) =
-                    &right_node
-                {
-                    return Err(CompilerError::DivisionByZero(self.lexer.pos));
-                }
-            }
-
             node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node), span);
         }
 
@@ -96,7 +87,7 @@ impl<'a> Parser<'a> {
             let span = self.current_token.span.clone();
 
             self.advance()?;
-            let right_node = self.parse_exponentiation()?; // Recur to handle right-associativity
+            let right_node = self.parse_exponentiation()?; // Recursion to handle right-associativity
 
             node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node), span);
         }

@@ -14,20 +14,20 @@ pub enum ASTNode {
 
 // Wrapper for the ASTNode to have a built in Variable Manager
 pub struct ASTWrapper {
-    tree: ASTNode,
+    ast: ASTNode,
     vars: VariableManager,
 }
 
 impl ASTWrapper {
     pub fn new(tree: ASTNode) -> Self {
         Self {
-            tree,
+            ast: tree,
             vars: VariableManager::new(),
         }
     }
 
     pub fn evaluate(&mut self) {
-        match self.tree.evaluate(&mut self.vars) {
+        match self.ast.evaluate(&mut self.vars) {
             Ok(result) => println!("Evaluation result: {}", result),
             Err(e) => eprintln!("Evaluation error: {}", e),
         }

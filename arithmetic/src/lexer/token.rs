@@ -36,7 +36,7 @@ pub enum TokenKind {
     Cos,
     Tan,
     Cotan,
-    Arcsin, // Standardized capitalization
+    Arcsin,
     Arccos,
     Arctan,
     Arccotan,
@@ -69,11 +69,7 @@ impl Token {
 // Handling the Display for Token, TokenKind and Num
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "Token: {:?}\n  Span: {:?}\n", 
-            self.kind, self.span
-        )
+        write!(f, "Token: {:?}\n  Span: {:?}\n", self.kind, self.span)
     }
 }
 

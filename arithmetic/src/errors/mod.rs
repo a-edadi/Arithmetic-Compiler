@@ -3,32 +3,34 @@ use std::{fmt, usize};
 
 #[derive(Debug, PartialEq)]
 pub enum CompilerError {
+    // Lexer Stage Errors
     InvalidNumber(String, usize, usize),
     InvalidCharacter(char, usize, usize),
-    UnexpectedError(usize, usize),
     InvalidIdentifier(usize, usize),
 
-    // Parser Errors
+    // Parser Stage Errors
     UnexpectedToken(TokenKind, usize, usize),
     MissingLParen(usize, usize),
     MissingRParen(usize, usize),
-    DivisionByZero(usize),
     MissingOperator(usize, usize),
 
-    // Evaluation errors
-    EvalDivisionByZero(usize),
+    // Evaluation Stage errors
+    UnsupportedBinaryOperator(String, usize, usize),
+    UnsupportedUnaryOperator(String, usize, usize),
+    DivisionByZero(usize, usize),
     IntegerOperatorWithFloatOperands(usize, usize),
-    UnsupportedBinaryOperator(String, usize),
-    UnsupportedUnaryOperator(String, usize),
     UnsupportedFunction(String, usize),
-    Unexpected,
+    InValidConstant(usize, usize),
+    InvalidMantissa(usize, usize),
+
+    // Generic error
+    UnexpectedError(usize, usize),
 }
 
 // Implement Display for CompilerError to provide descriptive error messages
 impl fmt::Display for CompilerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            // Lexer Errors
             CompilerError::InvalidNumber(num, line, pos) => {
                 write!(
                     f,
@@ -43,13 +45,7 @@ impl fmt::Display for CompilerError {
                     char, line, pos
                 )
             }
-            CompilerError::UnexpectedError(line, pos) => {
-                write!(
-                    f,
-                    "Unexpected Error: Occurred at line {}, position {}.",
-                    line, pos
-                )
-            }
+
             CompilerError::InvalidIdentifier(line, pos) => {
                 write!(
                     f,
@@ -57,8 +53,6 @@ impl fmt::Display for CompilerError {
                     line, pos
                 )
             }
-
-            // Parser
             CompilerError::UnexpectedToken(kind, line, pos) => {
                 write!(
                     f,
@@ -80,11 +74,11 @@ impl fmt::Display for CompilerError {
                     line, pos
                 )
             }
-            CompilerError::DivisionByZero(pos) => {
+            CompilerError::DivisionByZero(line, pos) => {
                 write!(
                     f,
-                    "Runtime Error: Division by zero attempted at position {}.",
-                    pos
+                    "Runtime Error: Division by zero attempted at line {}, position {}.",
+                    line, pos
                 )
             }
             CompilerError::MissingOperator(line, pos) => {
@@ -94,30 +88,24 @@ impl fmt::Display for CompilerError {
                     line, pos
                 )
             }
-            CompilerError::EvalDivisionByZero(line) => {
-                write!(
-                    f,
-                    "Runtime Error: Cannot evaluate expression due to division by zero.  at line: {}" , line
-                )
-            }
             CompilerError::IntegerOperatorWithFloatOperands(line, column) => {
                 write!(
                     f,
                     "Runtime Error: Integer operators (Div or Mod) require integer operands only.  at line: {}, column: {}" , line , column
                 )
             }
-            CompilerError::UnsupportedBinaryOperator(op, line) => {
+            CompilerError::UnsupportedBinaryOperator(op, line, pos) => {
                 write!(
                     f,
-                    "Syntax Error: Unsupported binary operator '{}'. at line: {}",
-                    op, line
+                    "Syntax Error: Unsupported binary operator '{}'. at line: {}, position: {}",
+                    op, line, pos
                 )
             }
-            CompilerError::UnsupportedUnaryOperator(op, line) => {
+            CompilerError::UnsupportedUnaryOperator(op, line, pos) => {
                 write!(
                     f,
-                    "Syntax Error: Unsupported unary operator '{}'. at line {}",
-                    op, line
+                    "Syntax Error: Unsupported unary operator '{}'. at line {}, at position {}",
+                    op, line, pos
                 )
             }
             CompilerError::UnsupportedFunction(func, line) => {
@@ -127,8 +115,18 @@ impl fmt::Display for CompilerError {
                     func, line
                 )
             }
-            CompilerError::Unexpected => {
-                write!(f, "something unexpected happened at eval stage")
+            CompilerError::InValidConstant(line, pos) => {
+                write!(f, "Invalid Constant '{}'. at line {}", line, pos)
+            }
+            CompilerError::InvalidMantissa(line, pos) => {
+                write!(f, "Invalid Mantissa'{}'. at line {}", line, pos)
+            }
+            CompilerError::UnexpectedError(line, pos) => {
+                write!(
+                    f,
+                    "Unexpected Error: Occurred at line {}, position {}.",
+                    line, pos
+                )
             }
         }
     }

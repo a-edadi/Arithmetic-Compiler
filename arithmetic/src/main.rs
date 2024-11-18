@@ -13,7 +13,7 @@ fn ultimate_printer(input: &str) {
 }
 
 fn main() {
-    let input = "-(- sIn (x  * 4*arctan(1) /180) //term
+    let input = "-(- sIn (x  * 4*arctan(1) 180) //term
     + log (exp(Y1))/log(e) {comment}+ sqrt(sqr(-_xY_2__z_))//term3
     {
         comment

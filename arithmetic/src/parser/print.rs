@@ -31,8 +31,8 @@ pub fn print_postfix(input: &str) {
 pub fn print_evaluation(input: &str) {
     match lex_parse_input(input) {
         Ok(ast) => {
-            let mut ast_tree = ASTWrapper::new(ast);
-            ast_tree.evaluate();
+            let mut ast_wrapper = ASTWrapper::new(ast);
+            ast_wrapper.evaluate();
         }
         Err(error) => eprintln!("{}", error),
     }

@@ -24,13 +24,17 @@ impl ASTNode {
                     TokenKind::Plus => Ok(left_val + right_val),
                     TokenKind::Minus => Ok(left_val - right_val),
                     TokenKind::Multiply => Ok(left_val * right_val),
+
+                    // Check for Division By Zero: 1/0 -> Err
                     TokenKind::Divide => {
                         if right_val == 0.0 {
-                            Err(CompilerError::EvalDivisionByZero(span.line))
+                            Err(CompilerError::DivisionByZero(span.line, span.start))
                         } else {
                             Ok(left_val / right_val)
                         }
                     }
+
+                    // Handle Mod: 2 mod 3.2 or 3.2 mod 2 -> Err
                     TokenKind::Mod => {
                         if left_val.fract() != 0.0 || right_val.fract() != 0.0 {
                             Err(CompilerError::IntegerOperatorWithFloatOperands(
@@ -41,6 +45,8 @@ impl ASTNode {
                             Ok(left_val % right_val)
                         }
                     }
+
+                    // Handle Div: 2 div 3.2 or 3.2 div 2 or 2 div 0 -> Err
                     TokenKind::Div => {
                         if left_val.fract() != 0.0 || right_val.fract() != 0.0 {
                             Err(CompilerError::IntegerOperatorWithFloatOperands(
@@ -48,19 +54,23 @@ impl ASTNode {
                                 span.column,
                             ))
                         } else if right_val == 0.0 {
-                            Err(CompilerError::EvalDivisionByZero(span.line))
+                            Err(CompilerError::DivisionByZero(span.line, span.start))
                         } else {
                             Ok((left_val / right_val).floor())
                         }
                     }
+
+                    // Handle Power ^
                     TokenKind::Power => Ok(left_val.powf(right_val)),
                     _ => Err(CompilerError::UnsupportedBinaryOperator(
                         op.to_string(),
                         span.line,
+                        span.start,
                     )),
                 }
             }
 
+            // Unary Operators: +2, -2, ...
             ASTNode::UnaryOp(op, expr, span) => {
                 let expr_val = expr.evaluate(var_manager)?;
                 match op {
@@ -69,18 +79,23 @@ impl ASTNode {
                     _ => Err(CompilerError::UnsupportedUnaryOperator(
                         op.to_string(),
                         span.line,
+                        span.start,
                     )),
                 }
             }
 
+            // Handle Function calls
             ASTNode::FunctionCall(func, arg, span) => {
                 let arg_val = arg.evaluate(var_manager)?;
                 match func.as_str() {
+                    // Trig Functions
                     "sin" => Ok(arg_val.to_radians().sin()),
                     "cos" => Ok(arg_val.to_radians().cos()),
                     "tan" => Ok(arg_val.to_radians().tan()),
                     "arctan" => Ok(arg_val.atan().to_degrees()),
                     "arccotan" => Ok((PI / 2.0 - arg_val.atan()).to_degrees()),
+
+                    // Other
                     "ln" => Ok(arg_val.ln()),
                     "log" => Ok(arg_val.log10()),
                     "exp" => Ok(arg_val.exp()),
@@ -93,17 +108,17 @@ impl ASTNode {
                 }
             }
 
-            ASTNode::Constant(token, _) => match token {
+            // Replace with the standard Pi and euler's number provided by rust
+            ASTNode::Constant(token, span) => match token {
                 TokenKind::Pi => Ok(PI),
                 TokenKind::Euler => Ok(E),
-                _ => Err(CompilerError::Unexpected),
-                // invalid constant
+                _ => Err(CompilerError::InValidConstant(span.line, span.start)),
             },
 
-            ASTNode::Mantissa(value, _) => match value.parse::<f64>() {
-                // invalid mantissa
+            // Parse the Mantiss string as a Number
+            ASTNode::Mantissa(value, span) => match value.parse::<f64>() {
                 Ok(parsed_value) => Ok(parsed_value),
-                Err(_) => Err(CompilerError::Unexpected),
+                Err(_) => Err(CompilerError::InvalidMantissa(span.line, span.start)),
             },
         }
     }
