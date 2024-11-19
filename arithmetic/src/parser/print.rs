@@ -37,3 +37,13 @@ pub fn print_evaluation(input: &str) {
         Err(error) => eprintln!("{}", error),
     }
 }
+
+pub fn print_postfix_evaluation(input: &str) {
+    match lex_parse_input(input) {
+        Ok(ast) => {
+            let mut ast_wrapper = ASTWrapper::new(ast);
+            ast_wrapper.evaluate_postfix();
+        }
+        Err(error) => eprintln!("{}", error),
+    }
+}

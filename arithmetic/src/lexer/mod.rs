@@ -113,7 +113,18 @@ impl<'a> Lexer<'a> {
                 "e" => TokenKind::Euler,
                 "pi" => TokenKind::Pi,
 
-                _ => TokenKind::Identifier(identifier),
+                _ => {
+                    // should not happen due to the way we handle numbers remove?
+                    if identifier_lower
+                        .chars()
+                        .next()
+                        .map_or(false, |c| c.is_ascii_digit())
+                    {
+                        return Err(CompilerError::InvalidIdentifier(self.line, self.pos));
+                    } else {
+                        TokenKind::Identifier(identifier)
+                    }
+                }
             }
         } else if Self::is_ascii_start(&c) {
             self.handle_punctuation()?

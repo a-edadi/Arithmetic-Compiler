@@ -10,11 +10,12 @@ fn ultimate_printer(input: &str) {
     parser_print::print_ast(input);
     parser_print::print_postfix(input);
     parser_print::print_evaluation(input);
+    parser_print::print_postfix_evaluation(input);
 }
 
 fn main() {
-    let input = "-(- sIn (x  * 4*arctan(1) 180) //term
-    + log (exp(Y1))/log(e) {comment}+ sqrt(sqr(-_xY_2__z_))//term3
+    let input = "-(- sIn (x  * 4*arctan(1)/ 180) //term
+    + log (exp(Y1))/log(e) {comment}+ sqrt(sqr(-2_xY_2__z_))//term3
     {
         comment
     }

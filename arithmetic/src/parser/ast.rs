@@ -14,8 +14,8 @@ pub enum ASTNode {
 
 // Wrapper for the ASTNode to have a built in Variable Manager
 pub struct ASTWrapper {
-    ast: ASTNode,
-    vars: VariableManager,
+    pub ast: ASTNode,
+    pub vars: VariableManager,
 }
 
 impl ASTWrapper {
@@ -30,6 +30,13 @@ impl ASTWrapper {
         match self.ast.evaluate(&mut self.vars) {
             Ok(result) => println!("Evaluation result: {}", result),
             Err(e) => eprintln!("Evaluation error: {}", e),
+        }
+    }
+
+    pub fn evaluate_postfix(&mut self) {
+        match self.ast.evaluate_postfix(&mut self.vars) {
+            Ok(result) => println!("Postfix Evaluation result: {}", result),
+            Err(e) => eprintln!("Postfix Evaluation error: {}", e),
         }
     }
 }
