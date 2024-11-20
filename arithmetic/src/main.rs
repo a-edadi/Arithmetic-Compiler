@@ -10,7 +10,6 @@ fn ultimate_printer(input: &str) {
     parser_print::print_ast(input);
     parser_print::print_postfix(input);
     parser_print::print_evaluation(input);
-    parser_print::print_postfix_evaluation(input);
 }
 
 fn main() {

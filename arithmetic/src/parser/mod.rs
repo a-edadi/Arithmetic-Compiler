@@ -2,7 +2,6 @@ pub mod ast;
 pub mod ast_string;
 pub mod eval;
 pub mod postfix;
-pub mod postfix_eval;
 pub mod print;
 pub mod var_manager;
 

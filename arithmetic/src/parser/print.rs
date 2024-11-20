@@ -27,22 +27,11 @@ pub fn print_postfix(input: &str) {
     }
 }
 
-/// Wrap the tree with AST for variable management
 pub fn print_evaluation(input: &str) {
     match lex_parse_input(input) {
         Ok(ast) => {
             let mut ast_wrapper = ASTWrapper::new(ast);
             ast_wrapper.evaluate();
-        }
-        Err(error) => eprintln!("{}", error),
-    }
-}
-
-pub fn print_postfix_evaluation(input: &str) {
-    match lex_parse_input(input) {
-        Ok(ast) => {
-            let mut ast_wrapper = ASTWrapper::new(ast);
-            ast_wrapper.evaluate_postfix();
         }
         Err(error) => eprintln!("{}", error),
     }

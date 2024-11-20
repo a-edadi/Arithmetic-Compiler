@@ -28,13 +28,6 @@ impl ASTWrapper {
 
     pub fn evaluate(&mut self) {
         match self.ast.evaluate(&mut self.vars) {
-            Ok(result) => println!("Evaluation result: {}", result),
-            Err(e) => eprintln!("Evaluation error: {}", e),
-        }
-    }
-
-    pub fn evaluate_postfix(&mut self) {
-        match self.ast.evaluate_postfix(&mut self.vars) {
             Ok(result) => println!("Postfix Evaluation result: {}", result),
             Err(e) => eprintln!("Postfix Evaluation error: {}", e),
         }
