@@ -3,6 +3,7 @@ pub mod ast_string;
 pub mod eval;
 pub mod postfix;
 pub mod print;
+pub mod roots;
 pub mod var_manager;
 
 use crate::errors::CompilerError;

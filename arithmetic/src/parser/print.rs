@@ -36,3 +36,24 @@ pub fn print_evaluation(input: &str) {
         Err(error) => eprintln!("{}", error),
     }
 }
+
+pub fn print_roots(input: &str) {
+    match lex_parse_input(input) {
+        Ok(ast) => {
+            let mut wrapper = ASTWrapper::new(ast);
+
+            // Calling the `find_all_roots_bisection` method
+            match wrapper.find_all_roots_bisection(1e-6, 1000, 0.1) {
+                Ok(roots) => {
+                    if roots.is_empty() {
+                        println!("No roots found in the given interval.");
+                    } else {
+                        println!("Roots found: {:?}", roots);
+                    }
+                }
+                Err(e) => eprintln!("Error finding roots: {}", e),
+            }
+        }
+        Err(error) => eprintln!("{}", error),
+    }
+}

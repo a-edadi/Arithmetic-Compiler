@@ -23,6 +23,11 @@ impl VariableManager {
         self.prompt_terminal_for_variable_value(&normalized_name)
     }
 
+    pub fn set_variable_value(&mut self, var_name: String, value: Num) {
+        let normalized_name = var_name.to_lowercase();
+        self.variables.insert(normalized_name, value);
+    }
+
     fn prompt_terminal_for_variable_value(&mut self, var_name: &str) -> Num {
         println!("Enter value for variable '{}':", var_name);
 
