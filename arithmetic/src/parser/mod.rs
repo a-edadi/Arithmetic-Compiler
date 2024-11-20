@@ -1,6 +1,8 @@
 pub mod ast;
 pub mod ast_string;
 pub mod eval;
+pub mod get_value;
+pub mod plot;
 pub mod postfix;
 pub mod print;
 pub mod roots;
@@ -13,6 +15,7 @@ use crate::lexer::{
     Lexer,
 };
 use ast::{ASTNode, ASTWrapper};
+use get_value::get_value;
 use var_manager::VariableManager;
 
 pub struct Parser<'a> {

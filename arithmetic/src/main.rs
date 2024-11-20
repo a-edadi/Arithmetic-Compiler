@@ -20,8 +20,9 @@ fn main() {
     }
     -2^2^3+X div 10-y1 mod  3+2.31+0.69+1.3E+2)";
 
-    let input2 = "x^2 - 4";
+    let input2 = "log(x) ";
 
     ultimate_printer(input);
     parser_print::print_roots(input2);
+    parser_print::print_plot(input2);
 }

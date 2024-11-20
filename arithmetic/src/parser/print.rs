@@ -57,3 +57,13 @@ pub fn print_roots(input: &str) {
         Err(error) => eprintln!("{}", error),
     }
 }
+
+pub fn print_plot(input: &str) {
+    match lex_parse_input(input) {
+        Ok(ast) => {
+            let mut wrapper = ASTWrapper::new(ast);
+            let _ = wrapper.plot_function();
+        }
+        Err(error) => eprintln!("{}", error),
+    }
+}

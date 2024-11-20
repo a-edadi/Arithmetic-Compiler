@@ -1,5 +1,4 @@
-use super::{ASTWrapper, Num};
-use std::io::{self, Write};
+use super::{get_value, ASTWrapper, Num};
 
 #[allow(unused_assignments)]
 impl ASTWrapper {
@@ -105,31 +104,10 @@ impl ASTWrapper {
         }
     }
 
-    fn evaluate_with_x(&mut self, x: f64) -> Result<f64, String> {
+    pub fn evaluate_with_x(&mut self, x: f64) -> Result<f64, String> {
         self.vars.set_variable_value("x".to_string(), Num::Float(x));
         self.ast
             .evaluate(&mut self.vars)
             .map_err(|e| format!("Evaluation error: {:?}", e))
-    }
-}
-
-fn get_value(name: &str) -> f64 {
-    loop {
-        print!("Enter the value for {}: ", name);
-        io::stdout().flush().unwrap();
-
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).unwrap();
-
-        let input = input.trim();
-
-        match input.parse::<f64>() {
-            Ok(value) => {
-                return value;
-            }
-            Err(_) => {
-                println!("Invalid input. Please enter a valid number.");
-            }
-        }
     }
 }
