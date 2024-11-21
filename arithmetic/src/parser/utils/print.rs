@@ -1,15 +1,5 @@
-use super::{ASTNode, ASTWrapper, Lexer, Parser};
-
-/// Lex, Parse input and return AST
-pub fn lex_parse_input(input: &str) -> Result<ASTNode, String> {
-    let lexer = Lexer::new(input);
-
-    let mut parser = Parser::new(lexer).unwrap();
-    match parser.parse_expression() {
-        Ok(ast) => Ok(ast),
-        Err(error) => Err(format!("{}", error)),
-    }
-}
+#![allow(dead_code)]
+use super::{lex_parse_input, ASTWrapper};
 
 /// Prints AST from the input
 pub fn print_ast(input: &str) {
@@ -27,12 +17,13 @@ pub fn print_postfix(input: &str) {
     }
 }
 
+/// Print the result of the evaluation. gets input from user for variables.
 pub fn print_evaluation(input: &str) {
     match lex_parse_input(input) {
         Ok(ast) => {
             let mut ast_wrapper = ASTWrapper::new(ast);
 
-            match ast_wrapper.evaluate_ast() {
+            match ast_wrapper.eval_ast() {
                 Ok(result) => println!("Evaluation result: {}", result),
                 Err(error) => eprintln!("Evaluation error: {:?}", error),
             }
@@ -41,13 +32,14 @@ pub fn print_evaluation(input: &str) {
     }
 }
 
+/// Print the roots of the given input
 pub fn print_roots(input: &str) {
     match lex_parse_input(input) {
         Ok(ast) => {
             let mut wrapper = ASTWrapper::new(ast);
 
             // Calling the `find_all_roots_bisection` method
-            match wrapper.find_roots(None, None) {
+            match wrapper.roots_string(None, None) {
                 Ok(roots) => {
                     if roots.is_empty() {
                         println!("No roots found in the given interval.");
@@ -62,11 +54,12 @@ pub fn print_roots(input: &str) {
     }
 }
 
+/// Plot the function and store it as image.
 pub fn print_plot(input: &str) {
     match lex_parse_input(input) {
         Ok(ast) => {
             let mut wrapper = ASTWrapper::new(ast);
-            let _ = wrapper.plot_function();
+            let _ = wrapper.plot(None, None);
         }
         Err(error) => eprintln!("{}", error),
     }

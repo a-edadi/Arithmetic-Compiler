@@ -6,25 +6,29 @@ use plotters::prelude::*;
 use std::fs;
 
 pub struct FunctionPlotter<'a> {
-    ast: &'a ASTNode,
     vars: &'a mut VariableManager,
 }
 
 impl<'a> FunctionPlotter<'a> {
-    pub fn new(ast: &'a ASTNode, vars: &'a mut VariableManager) -> Self {
-        Self { ast, vars }
+    pub fn new(vars: &'a mut VariableManager) -> Self {
+        Self { vars }
     }
 
-    fn evaluate_with_x(&mut self, x: f64) -> Result<f64, CompilerError> {
+    fn evaluate_with_x(&mut self, ast: &ASTNode, x: f64) -> Result<f64, CompilerError> {
         let mut evaluator = Evaluator::new(self.vars);
         evaluator.vars.set("x".to_string(), Num::Float(x));
-        evaluator.evaluate(self.ast)
+        evaluator.evaluate(ast)
     }
 
-    pub fn plot_function(&mut self) -> Result<(), CompilerError> {
+    pub fn plot_function(
+        &mut self,
+        ast: &ASTNode,
+        a: Option<f64>,
+        b: Option<f64>,
+    ) -> Result<(), CompilerError> {
         // Get user input
-        let a = get_and_parse_user_input("a (start of interval)");
-        let b = get_and_parse_user_input("b (end of interval)");
+        let a = a.unwrap_or_else(|| get_and_parse_user_input("a"));
+        let b = b.unwrap_or_else(|| get_and_parse_user_input("b"));
 
         // Generate x values
         let sample_points = 1000;
@@ -35,12 +39,12 @@ impl<'a> FunctionPlotter<'a> {
         // Pre-calculate all y values
         let mut y_values = Vec::with_capacity(x_values.len());
         for &x in x_values.iter() {
-            y_values.push(self.evaluate_with_x(x).unwrap_or(0.0));
+            y_values.push(self.evaluate_with_x(ast, x).unwrap_or(0.0));
         }
 
         // Create a new evaluator for root finding
         let mut evaluator = Evaluator::new(self.vars);
-        let mut root_finder = RootFinder::new(self.ast, &mut evaluator);
+        let mut root_finder = RootFinder::new(ast, &mut evaluator);
         let roots = root_finder
             .find_roots(Some(a), Some(b))
             .map_err(|_| CompilerError::Plot(PlottingError::GenericPlottingError))?;
@@ -48,10 +52,21 @@ impl<'a> FunctionPlotter<'a> {
         // Pre-calculate root y-values
         let mut root_points = Vec::new();
         for &root in roots.iter() {
-            let y = self.evaluate_with_x(root).unwrap_or(0.0);
+            let y = self.evaluate_with_x(ast, root).unwrap_or(0.0);
             root_points.push((root, y));
         }
 
+        self.create_and_save_plot(a, b, x_values, y_values, root_points)
+    }
+
+    fn create_and_save_plot(
+        &self,
+        a: f64,
+        b: f64,
+        x_values: Vec<f64>,
+        y_values: Vec<f64>,
+        root_points: Vec<(f64, f64)>,
+    ) -> Result<(), CompilerError> {
         // Calculate y range
         let y_min = y_values.iter().copied().reduce(f64::min).unwrap_or(0.0);
         let y_max = y_values.iter().copied().reduce(f64::max).unwrap_or(0.0);

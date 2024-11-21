@@ -1,5 +1,4 @@
 use std::io::{self, Write};
-use std::time::{SystemTime, UNIX_EPOCH};
 
 pub fn get_and_parse_user_input(name: &str) -> f64 {
     loop {
@@ -17,12 +16,4 @@ pub fn get_and_parse_user_input(name: &str) -> f64 {
             Err(_) => println!("Invalid input. Please enter a valid number."),
         }
     }
-}
-/// Generate random number
-pub fn generate_random_4_digits() -> u16 {
-    // Get the current time in milliseconds
-    let duration = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
-    let seed = duration.as_secs() as u16;
-
-    (seed % 9000) + 1000
 }

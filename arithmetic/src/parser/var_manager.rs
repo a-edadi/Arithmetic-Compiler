@@ -12,6 +12,7 @@ impl VariableManager {
         }
     }
 
+    /// get value of a variable from the user.
     pub fn get(&mut self, var_name: &str) -> Num {
         let normalized_name = var_name.to_lowercase();
 
@@ -30,8 +31,14 @@ impl VariableManager {
         num_value
     }
 
+    /// set the value of a variable.
     pub fn set(&mut self, var_name: String, value: Num) {
         let normalized_name = var_name.to_lowercase();
         self.variables.insert(normalized_name, value);
+    }
+
+    /// clear the variable and values stored
+    pub fn clear(&mut self) {
+        self.variables.clear();
     }
 }

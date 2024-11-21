@@ -2,15 +2,7 @@ mod errors;
 mod lexer;
 mod parser;
 
-use lexer::print as lexer_print;
-use parser::print as parser_print;
-
-fn ultimate_printer(input: &str) {
-    lexer_print::lex_print(input);
-    parser_print::print_ast(input);
-    parser_print::print_postfix(input);
-    parser_print::print_evaluation(input);
-}
+use parser::utils::ultimate::{ultimate_ast_postfix_eval, ultimate_root_plot};
 
 fn main() {
     let input = "-(- sIn (x  * 4*arctan(1)/ 180) //term
@@ -20,9 +12,10 @@ fn main() {
     }
     -2^2^3+X div 10-y1 mod  3+2.31+0.69+1.3E+2)";
 
-    let input2 = "x^2 - 4";
+    // let input2 = "x^2 - 4";
+    let input2 = "sin(x)";
 
-    ultimate_printer(input);
-    parser_print::print_roots(input2);
-    parser_print::print_plot(input2);
+    ultimate_ast_postfix_eval(input);
+    println!("\n\n\n Pause \n\n\n");
+    ultimate_root_plot(input2);
 }

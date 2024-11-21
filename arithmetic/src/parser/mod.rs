@@ -1,10 +1,10 @@
 pub mod ast;
+pub mod ast_postfix;
 pub mod ast_string;
+pub mod ast_wrapper;
 pub mod eval;
-pub mod plot;
-pub mod postfix;
-pub mod print;
-pub mod roots;
+pub mod function_plotter;
+pub mod root_finder;
 pub mod utils;
 pub mod var_manager;
 
@@ -17,11 +17,14 @@ use crate::lexer::{
     token::{Num, Token, TokenKind},
     Lexer,
 };
-use ast::{ASTNode, ASTWrapper};
+use crate::parser::utils::{
+    prompt_input::get_and_parse_user_input, random_number::generate_random_4_digits,
+};
+use ast::ASTNode;
+use ast_wrapper::ASTWrapper;
 use eval::Evaluator;
-use plot::FunctionPlotter;
-use roots::RootFinder;
-use utils::{generate_random_4_digits, get_and_parse_user_input};
+use function_plotter::FunctionPlotter;
+use root_finder::RootFinder;
 use var_manager::VariableManager;
 
 pub struct Parser<'a> {

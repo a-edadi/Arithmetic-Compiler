@@ -11,6 +11,7 @@ use parser::ParserError;
 use plot::PlottingError;
 use root_finder::RootFinderError;
 use std::fmt;
+
 #[derive(Debug, PartialEq)]
 pub enum CompilerError {
     Lex(LexerError),
