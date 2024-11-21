@@ -2,7 +2,20 @@ use super::{get_and_parse_user_input, ASTWrapper, Num};
 
 #[allow(unused_assignments)]
 impl ASTWrapper {
-    /// Find a single root
+    pub fn evaluate_with_x(&mut self, x: f64) -> Result<f64, String> {
+        // Set the variable "x"
+        self.vars.set_variable_value("x".to_string(), Num::Float(x));
+        let ast = self.ast.clone();
+
+        // Evaluate the AST
+        self.process_node(&ast)
+            .map_err(|e| format!("Evaluation error: {:?}", e))?;
+
+        // Get the result
+        self.get_result()
+            .map_err(|e| format!("Error retrieving result: {:?}", e))
+    }
+
     pub fn find_root_bisection(
         &mut self,
         a: f64,
@@ -59,32 +72,50 @@ impl ASTWrapper {
         tolerance: f64,
         max_iterations: usize,
         step_size: f64,
+        a: f64,
+        b: f64,
     ) -> Result<Vec<f64>, String> {
-        let a = get_and_parse_user_input("a");
-        let b = get_and_parse_user_input("b");
-
         if a >= b {
             return Err("Invalid interval: `a` must be less than `b`.".to_string());
         }
 
         let mut roots = Vec::new();
 
-        let mut left = a;
-        while left < b {
-            let right = (left + step_size).min(b);
+        let expanded_a = a - (b - a) * 0.1;
+        let expanded_b = b + (b - a) * 0.1;
 
-            let f_left = self.evaluate_with_x(left)?;
-            let f_right = self.evaluate_with_x(right)?;
+        let mut left = expanded_a;
+        while left < expanded_b {
+            let right = (left + step_size).min(expanded_b);
 
-            if f_left * f_right < 0.0 {
+            let f_left = match self.evaluate_with_x(left) {
+                Ok(val) => val,
+                Err(_) => {
+                    left = right;
+                    continue;
+                }
+            };
+
+            let f_right = match self.evaluate_with_x(right) {
+                Ok(val) => val,
+                Err(_) => {
+                    left = right;
+                    continue;
+                }
+            };
+
+            // Check for sign change and potential root
+            if f_left * f_right <= 0.0 {
                 match self.find_root_bisection(left, right, tolerance, max_iterations) {
                     Ok(root) => {
-                        let rounded_root = root.round();
-                        if !roots
-                            .iter()
-                            .any(|&r: &f64| (r - rounded_root).abs() <= tolerance)
-                        {
-                            roots.push(rounded_root);
+                        if root >= a && root <= b {
+                            let rounded_root = (root * 1000.0).round() / 1000.0;
+                            if !roots
+                                .iter()
+                                .any(|&r| (r as f64 - rounded_root).abs() <= tolerance)
+                            {
+                                roots.push(rounded_root);
+                            }
                         }
                     }
                     Err(e) => eprintln!(
@@ -97,17 +128,12 @@ impl ASTWrapper {
             left = right;
         }
 
-        if roots.is_empty() {
-            Err("No roots found in the given interval.".to_string())
-        } else {
-            Ok(roots)
-        }
+        Ok(roots)
     }
 
-    pub fn evaluate_with_x(&mut self, x: f64) -> Result<f64, String> {
-        self.vars.set_variable_value("x".to_string(), Num::Float(x));
-        self.ast
-            .evaluate(&mut self.vars)
-            .map_err(|e| format!("Evaluation error: {:?}", e))
+    pub fn find_roots(&mut self, a: Option<f64>, b: Option<f64>) -> Result<Vec<f64>, String> {
+        let a = a.unwrap_or_else(|| get_and_parse_user_input("a"));
+        let b = b.unwrap_or_else(|| get_and_parse_user_input("b"));
+        self.find_all_roots_bisection(1e-6, 1000, 0.1, a, b)
     }
 }

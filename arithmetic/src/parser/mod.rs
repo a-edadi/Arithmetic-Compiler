@@ -15,7 +15,7 @@ use crate::lexer::{
     Lexer,
 };
 use ast::{ASTNode, ASTWrapper};
-use utils::get_and_parse_user_input;
+use utils::{generate_random_4_digits, get_and_parse_user_input};
 use var_manager::VariableManager;
 
 pub struct Parser<'a> {

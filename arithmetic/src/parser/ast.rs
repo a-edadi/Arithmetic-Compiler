@@ -1,7 +1,8 @@
 use super::{Num, TextSpan, TokenKind, VariableManager};
+use std::collections::VecDeque;
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ASTNode {
     Number(Num, TextSpan),
     BinaryOp(Box<ASTNode>, TokenKind, Box<ASTNode>, TextSpan),
@@ -13,8 +14,10 @@ pub enum ASTNode {
 }
 
 // Wrapper for the ASTNode to have a built in Variable Manager
+
 pub struct ASTWrapper {
     pub ast: ASTNode,
+    pub stack: VecDeque<f64>,
     pub vars: VariableManager,
 }
 
@@ -22,14 +25,8 @@ impl ASTWrapper {
     pub fn new(tree: ASTNode) -> Self {
         Self {
             ast: tree,
+            stack: VecDeque::new(),
             vars: VariableManager::new(),
-        }
-    }
-
-    pub fn evaluate(&mut self) {
-        match self.ast.evaluate(&mut self.vars) {
-            Ok(result) => println!("Postfix Evaluation result: {}", result),
-            Err(e) => eprintln!("Postfix Evaluation error: {}", e),
         }
     }
 }

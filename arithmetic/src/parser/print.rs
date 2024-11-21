@@ -31,9 +31,13 @@ pub fn print_evaluation(input: &str) {
     match lex_parse_input(input) {
         Ok(ast) => {
             let mut ast_wrapper = ASTWrapper::new(ast);
-            ast_wrapper.evaluate();
+
+            match ast_wrapper.evaluate() {
+                Ok(result) => println!("Evaluation result: {}", result),
+                Err(error) => eprintln!("Evaluation error: {:?}", error),
+            }
         }
-        Err(error) => eprintln!("{}", error),
+        Err(error) => eprintln!("Parsing error: {}", error),
     }
 }
 
@@ -43,7 +47,7 @@ pub fn print_roots(input: &str) {
             let mut wrapper = ASTWrapper::new(ast);
 
             // Calling the `find_all_roots_bisection` method
-            match wrapper.find_all_roots_bisection(1e-6, 1000, 0.1) {
+            match wrapper.find_roots(None, None) {
                 Ok(roots) => {
                     if roots.is_empty() {
                         println!("No roots found in the given interval.");
