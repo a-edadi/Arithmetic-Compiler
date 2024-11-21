@@ -6,7 +6,7 @@ pub mod span;
 pub mod token;
 pub mod utils;
 
-use crate::errors::CompilerError;
+use crate::errors::{lexer::LexerError, CompilerError};
 use span::TextSpan;
 use token::{Num, Token, TokenKind};
 
@@ -49,7 +49,11 @@ impl<'a> Lexer<'a> {
         // fetch the current char
         let c = match self.current_char() {
             Some(ch) => ch,
-            None => return Err(CompilerError::InvalidCharacter('\0', self.line, self.pos)),
+            None => {
+                return Err(CompilerError::Lex(LexerError::InvalidCharacter(
+                    '\0', self.line, self.pos,
+                )))
+            }
         };
 
         // Define Span values
@@ -73,12 +77,14 @@ impl<'a> Lexer<'a> {
         let kind = if Self::is_number_start(&c) {
             let number_kind = self
                 .handle_number()
-                .map_err(|_| CompilerError::UnexpectedError(self.line, self.pos))?;
+                .map_err(|_| CompilerError::GenericError(self.line, self.pos))?;
 
             // If the next character is part of an identifier -> Raise Error
             if let Some(next_char) = self.current_char() {
                 if Self::is_identifier_start(&next_char) {
-                    return Err(CompilerError::InvalidIdentifier(self.line, self.pos));
+                    return Err(CompilerError::Lex(LexerError::InvalidIdentifier(
+                        self.line, self.pos,
+                    )));
                 }
             }
 
@@ -120,7 +126,9 @@ impl<'a> Lexer<'a> {
                         .next()
                         .map_or(false, |c| c.is_ascii_digit())
                     {
-                        return Err(CompilerError::InvalidIdentifier(self.line, self.pos));
+                        return Err(CompilerError::Lex(LexerError::InvalidIdentifier(
+                            self.line, self.pos,
+                        )));
                     } else {
                         TokenKind::Identifier(identifier)
                     }
@@ -129,7 +137,7 @@ impl<'a> Lexer<'a> {
         } else if Self::is_ascii_start(&c) {
             self.handle_punctuation()?
         } else {
-            return Err(CompilerError::UnexpectedError(self.line, self.pos));
+            return Err(CompilerError::GenericError(self.line, self.pos));
         };
 
         let end = self.pos;

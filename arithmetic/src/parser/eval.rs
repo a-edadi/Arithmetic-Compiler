@@ -1,5 +1,4 @@
-use super::var_manager::VariableManager;
-use super::{ASTNode, CompilerError, Num, TokenKind};
+use super::{ASTNode, CompilerError, EvaluationError, Num, TokenKind, VariableManager};
 use std::collections::VecDeque;
 use std::f64::consts::{E, PI};
 
@@ -21,7 +20,11 @@ impl ASTNode {
                 ASTNode::Constant(token, span) => match token {
                     TokenKind::Pi => stack.push_back(PI),
                     TokenKind::Euler => stack.push_back(E),
-                    _ => return Err(CompilerError::InValidConstant(span.line, span.start)),
+                    _ => {
+                        return Err(CompilerError::Eval(EvaluationError::InvalidConstant(
+                            span.line, span.start,
+                        )))
+                    }
                 },
 
                 ASTNode::Identifier(id, _) => match var_manager.get_variable_value(id) {
@@ -31,7 +34,11 @@ impl ASTNode {
 
                 ASTNode::Mantissa(value, span) => match value.parse::<f64>() {
                     Ok(parsed_value) => stack.push_back(parsed_value),
-                    Err(_) => return Err(CompilerError::InvalidMantissa(span.line, span.start)),
+                    Err(_) => {
+                        return Err(CompilerError::Eval(EvaluationError::InvalidMantissa(
+                            span.line, span.start,
+                        )))
+                    }
                 },
 
                 ASTNode::BinaryOp(left, op, right, span) => {
@@ -39,7 +46,7 @@ impl ASTNode {
                     process_node(right, stack, var_manager)?;
 
                     if stack.len() < 2 {
-                        return Err(CompilerError::UnexpectedError(span.line, span.start));
+                        return Err(CompilerError::GenericError(span.line, span.start));
                     }
 
                     let right_val = stack.pop_back().unwrap();
@@ -51,35 +58,45 @@ impl ASTNode {
                         TokenKind::Multiply => left_val * right_val,
                         TokenKind::Divide => {
                             if right_val == 0.0 {
-                                return Err(CompilerError::DivisionByZero(span.line, span.start));
+                                return Err(CompilerError::Eval(EvaluationError::DivisionByZero(
+                                    span.line, span.start,
+                                )));
                             }
                             left_val / right_val
                         }
                         TokenKind::Mod => {
                             if left_val.fract() != 0.0 || right_val.fract() != 0.0 {
-                                return Err(CompilerError::IntegerOperatorWithFloatOperands(
-                                    span.line, span.start,
+                                return Err(CompilerError::Eval(
+                                    EvaluationError::IntegerOperatorWithFloatOperands(
+                                        span.line, span.start,
+                                    ),
                                 ));
                             }
                             left_val % right_val
                         }
                         TokenKind::Div => {
                             if left_val.fract() != 0.0 || right_val.fract() != 0.0 {
-                                return Err(CompilerError::IntegerOperatorWithFloatOperands(
-                                    span.line, span.start,
+                                return Err(CompilerError::Eval(
+                                    EvaluationError::IntegerOperatorWithFloatOperands(
+                                        span.line, span.start,
+                                    ),
                                 ));
                             }
                             if right_val == 0.0 {
-                                return Err(CompilerError::DivisionByZero(span.line, span.start));
+                                return Err(CompilerError::Eval(EvaluationError::DivisionByZero(
+                                    span.line, span.start,
+                                )));
                             }
                             (left_val / right_val).floor()
                         }
                         TokenKind::Power => left_val.powf(right_val),
                         _ => {
-                            return Err(CompilerError::UnsupportedBinaryOperator(
-                                op.to_string(),
-                                span.line,
-                                span.start,
+                            return Err(CompilerError::Eval(
+                                EvaluationError::UnsupportedBinaryOperator(
+                                    op.to_string(),
+                                    span.line,
+                                    span.start,
+                                ),
                             ))
                         }
                     };
@@ -91,7 +108,7 @@ impl ASTNode {
                     process_node(expr, stack, var_manager)?;
 
                     if stack.is_empty() {
-                        return Err(CompilerError::UnexpectedError(span.line, span.start));
+                        return Err(CompilerError::GenericError(span.line, span.start));
                     }
 
                     let val = stack.pop_back().unwrap();
@@ -99,10 +116,12 @@ impl ASTNode {
                         TokenKind::Minus => -val,
                         TokenKind::Plus => val,
                         _ => {
-                            return Err(CompilerError::UnsupportedUnaryOperator(
-                                op.to_string(),
-                                span.line,
-                                span.start,
+                            return Err(CompilerError::Eval(
+                                EvaluationError::UnsupportedUnaryOperator(
+                                    op.to_string(),
+                                    span.line,
+                                    span.start,
+                                ),
                             ))
                         }
                     };
@@ -114,7 +133,7 @@ impl ASTNode {
                     process_node(arg, stack, var_manager)?;
 
                     if stack.is_empty() {
-                        return Err(CompilerError::UnexpectedError(span.line, span.start));
+                        return Err(CompilerError::GenericError(span.line, span.start));
                     }
 
                     let arg_val = stack.pop_back().unwrap();
@@ -130,10 +149,10 @@ impl ASTNode {
                         "sqrt" => arg_val.sqrt(),
                         "sqr" => arg_val * arg_val,
                         _ => {
-                            return Err(CompilerError::UnsupportedFunction(
+                            return Err(CompilerError::Eval(EvaluationError::UnsupportedFunction(
                                 func.to_string(),
                                 span.line,
-                            ))
+                            )))
                         }
                     };
 
@@ -145,6 +164,6 @@ impl ASTNode {
 
         process_node(self, &mut stack, var_manager)?;
 
-        stack.pop_back().ok_or(CompilerError::UnexpectedError(0, 0))
+        stack.pop_back().ok_or(CompilerError::GenericError(0, 0))
     }
 }

@@ -1,21 +1,21 @@
 pub mod ast;
 pub mod ast_string;
 pub mod eval;
-pub mod get_value;
 pub mod plot;
 pub mod postfix;
 pub mod print;
 pub mod roots;
+pub mod utils;
 pub mod var_manager;
 
-use crate::errors::CompilerError;
+use crate::errors::{eval::EvaluationError, parser::ParserError, CompilerError};
 use crate::lexer::{
     span::TextSpan,
     token::{Num, Token, TokenKind},
     Lexer,
 };
 use ast::{ASTNode, ASTWrapper};
-use get_value::get_value;
+use utils::get_and_parse_user_input;
 use var_manager::VariableManager;
 
 pub struct Parser<'a> {
@@ -124,10 +124,10 @@ impl<'a> Parser<'a> {
 
                 // Check if the next token is also a number without an operator between them
                 if let TokenKind::Number(_) = self.current_token.kind {
-                    return Err(CompilerError::MissingOperator(
+                    return Err(CompilerError::Parse(ParserError::MissingOperator(
                         self.lexer.line,
                         self.lexer.pos,
-                    ));
+                    )));
                 }
 
                 Ok(ASTNode::Number(value, span))
@@ -173,10 +173,10 @@ impl<'a> Parser<'a> {
                 // after function there should be parens like sin(
                 // if there is no left paren Raise error, we are expecting LeftParen
                 if self.current_token.kind != TokenKind::LeftParen {
-                    return Err(CompilerError::MissingLParen(
+                    return Err(CompilerError::Parse(ParserError::MissingLParen(
                         self.lexer.pos,
                         self.lexer.line,
-                    ));
+                    )));
                 }
 
                 self.advance()?; // Skip '('
@@ -186,10 +186,10 @@ impl<'a> Parser<'a> {
 
                 // after parsing the inner expression we are looking for ) RightParen
                 if self.current_token.kind != TokenKind::RightParen {
-                    return Err(CompilerError::MissingRParen(
+                    return Err(CompilerError::Parse(ParserError::MissingRParen(
                         self.lexer.line,
                         self.lexer.pos,
-                    ));
+                    )));
                 }
 
                 self.advance()?; // Skip ')'
@@ -209,11 +209,11 @@ impl<'a> Parser<'a> {
                     TokenKind::Sqrt => "sqrt",
                     TokenKind::Sqr => "sqr",
                     _ => {
-                        return Err(CompilerError::UnexpectedToken(
+                        return Err(CompilerError::Parse(ParserError::UnexpectedToken(
                             self.current_token.kind.clone(),
                             self.lexer.pos,
                             self.lexer.line,
-                        ))
+                        )))
                     }
                 };
 
@@ -237,27 +237,27 @@ impl<'a> Parser<'a> {
                 self.advance()?;
                 let node = self.parse_expression()?;
                 if self.current_token.kind != TokenKind::RightParen {
-                    return Err(CompilerError::MissingRParen(
+                    return Err(CompilerError::Parse(ParserError::MissingRParen(
                         self.lexer.line,
                         self.lexer.pos,
-                    ));
+                    )));
                 }
                 self.advance()?; // Skip ')'
                 Ok(node)
             }
 
             // handle single right paren, Missing left paren
-            TokenKind::RightParen => Err(CompilerError::MissingLParen(
+            TokenKind::RightParen => Err(CompilerError::Parse(ParserError::MissingLParen(
                 self.lexer.line,
                 self.lexer.pos,
-            )),
+            ))),
 
             // Unexpected token
-            _ => Err(CompilerError::UnexpectedToken(
+            _ => Err(CompilerError::Parse(ParserError::UnexpectedToken(
                 self.current_token.kind.clone(),
                 self.lexer.pos,
                 self.lexer.line,
-            )),
+            ))),
         }
     }
 }

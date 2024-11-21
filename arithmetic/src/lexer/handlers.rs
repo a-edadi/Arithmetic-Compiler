@@ -1,4 +1,4 @@
-use super::{CompilerError, Lexer, Num, TokenKind};
+use super::{CompilerError, Lexer, LexerError, Num, TokenKind};
 
 impl<'a> Lexer<'a> {
     /// 0...9
@@ -45,11 +45,11 @@ impl<'a> Lexer<'a> {
             '(' => Ok(TokenKind::LeftParen),
             ')' => Ok(TokenKind::RightParen),
             '^' => Ok(TokenKind::Power),
-            _ => Err(CompilerError::InvalidCharacter(
+            _ => Err(CompilerError::Lex(LexerError::InvalidCharacter(
                 c,
                 self.line,
                 self.pos - 1,
-            )),
+            ))),
         }
     }
 
@@ -60,10 +60,9 @@ impl<'a> Lexer<'a> {
         // Ensure the first character is valid for the start of an identifier
         if let Some(c) = self.current_char() {
             if c.is_digit(10) {
-                return Err(CompilerError::InvalidIdentifier(
-                    self.line,
-                    self.pos,
-                ));
+                return Err(CompilerError::Lex(LexerError::InvalidIdentifier(
+                    self.line, self.pos,
+                )));
             } else if Self::is_identifier_start(&c) {
                 identifier.push(c);
                 self.advance();
@@ -132,9 +131,9 @@ impl<'a> Lexer<'a> {
             // Ensure the scientific notation is valid
             if !has_exponent_digits {
                 // TODO: InvalidMantissa in the compiler error
-                return Err(CompilerError::InvalidNumber(
+                return Err(CompilerError::Lex(LexerError::InvalidNumber(
                     number_str, self.line, start_pos,
-                ));
+                )));
             }
         }
 
@@ -146,17 +145,17 @@ impl<'a> Lexer<'a> {
             // Handle floating-point numbers
             match number_str.parse::<f64>() {
                 Ok(float_num) => Ok(TokenKind::Number(Num::Float(float_num))),
-                Err(_) => Err(CompilerError::InvalidNumber(
+                Err(_) => Err(CompilerError::Lex(LexerError::InvalidNumber(
                     number_str, self.line, start_pos,
-                )),
+                ))),
             }
         } else {
             // Handle integers
             match number_str.parse::<i64>() {
                 Ok(int_num) => Ok(TokenKind::Number(Num::Integer(int_num))),
-                Err(_) => Err(CompilerError::InvalidNumber(
+                Err(_) => Err(CompilerError::Lex(LexerError::InvalidNumber(
                     number_str, self.line, start_pos,
-                )),
+                ))),
             }
         }
     }

@@ -1,4 +1,4 @@
-use super::{get_value, ASTWrapper, Num};
+use super::{get_and_parse_user_input, ASTWrapper, Num};
 
 #[allow(unused_assignments)]
 impl ASTWrapper {
@@ -60,8 +60,8 @@ impl ASTWrapper {
         max_iterations: usize,
         step_size: f64,
     ) -> Result<Vec<f64>, String> {
-        let a = get_value("a");
-        let b = get_value("b");
+        let a = get_and_parse_user_input("a");
+        let b = get_and_parse_user_input("b");
 
         if a >= b {
             return Err("Invalid interval: `a` must be less than `b`.".to_string());

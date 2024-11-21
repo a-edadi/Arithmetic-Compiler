@@ -1,11 +1,11 @@
-use super::{get_value, ASTWrapper};
+use super::{get_and_parse_user_input, ASTWrapper};
 use plotters::prelude::*;
 
 impl ASTWrapper {
     pub fn plot_function(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         // Get the user-provided interval values
-        let a = get_value("a (start of interval)");
-        let b = get_value("b (end of interval)");
+        let a = get_and_parse_user_input("a (start of interval)");
+        let b = get_and_parse_user_input("b (end of interval)");
 
         // Increase sample points for smoother curve, especially for trigonometric functions
         let sample_points = 1000; // Increased from previous implementations
