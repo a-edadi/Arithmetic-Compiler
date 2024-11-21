@@ -1,19 +1,18 @@
-use super::{get_and_parse_user_input, ASTWrapper, Num};
+use super::{ast::ASTNode, get_and_parse_user_input, CompilerError, Evaluator, RootFinderError};
+
+pub struct RootFinder<'a> {
+    ast: &'a ASTNode,
+    evaluator: &'a mut Evaluator<'a>,
+}
 
 #[allow(unused_assignments)]
-impl ASTWrapper {
-    pub fn evaluate_with_x(&mut self, x: f64) -> Result<f64, String> {
-        // Set the variable "x"
-        self.vars.set_variable_value("x".to_string(), Num::Float(x));
-        let ast = self.ast.clone();
+impl<'a> RootFinder<'a> {
+    pub fn new(ast: &'a ASTNode, evaluator: &'a mut Evaluator<'a>) -> Self {
+        Self { ast, evaluator }
+    }
 
-        // Evaluate the AST
-        self.process_node(&ast)
-            .map_err(|e| format!("Evaluation error: {:?}", e))?;
-
-        // Get the result
-        self.get_result()
-            .map_err(|e| format!("Error retrieving result: {:?}", e))
+    pub fn evaluate_with_x(&mut self, x: f64) -> Result<f64, CompilerError> {
+        self.evaluator.evaluate_with_x(self.ast, x)
     }
 
     pub fn find_root_bisection(
@@ -22,9 +21,9 @@ impl ASTWrapper {
         b: f64,
         tolerance: f64,
         max_iterations: usize,
-    ) -> Result<f64, String> {
+    ) -> Result<f64, CompilerError> {
         if a >= b {
-            return Err("Invalid interval: `a` must be less than `b`.".to_string());
+            return Err(CompilerError::Root(RootFinderError::InvalidInterval));
         }
 
         let mut left = a;
@@ -35,10 +34,7 @@ impl ASTWrapper {
         let mut f_right = self.evaluate_with_x(right)?;
 
         if f_left * f_right > 0.0 {
-            return Err(
-                "No root guaranteed in the interval (f(a) and f(b) must have opposite signs)."
-                    .to_string(),
-            );
+            return Err(CompilerError::Root(RootFinderError::NoRootInInterval));
         }
 
         while (right - left).abs() > tolerance && iterations < max_iterations {
@@ -61,22 +57,22 @@ impl ASTWrapper {
         }
 
         if iterations >= max_iterations {
-            Err("Maximum iterations reached without finding a root.".to_string())
+            return Err(CompilerError::Root(RootFinderError::MaxIterationsReached));
         } else {
             Ok((left + right) / 2.0)
         }
     }
 
-    pub fn find_all_roots_bisection(
+    pub fn find_all_roots(
         &mut self,
         tolerance: f64,
         max_iterations: usize,
         step_size: f64,
         a: f64,
         b: f64,
-    ) -> Result<Vec<f64>, String> {
+    ) -> Result<Vec<f64>, CompilerError> {
         if a >= b {
-            return Err("Invalid interval: `a` must be less than `b`.".to_string());
+            return Err(CompilerError::Root(RootFinderError::InvalidInterval));
         }
 
         let mut roots = Vec::new();
@@ -109,7 +105,9 @@ impl ASTWrapper {
                 match self.find_root_bisection(left, right, tolerance, max_iterations) {
                     Ok(root) => {
                         if root >= a && root <= b {
-                            let rounded_root = (root * 1000.0).round() / 1000.0;
+                            // let rounded_root = (root * 1000.0).round() / 1000.0;
+                            let rounded_root = root.round();
+
                             if !roots
                                 .iter()
                                 .any(|&r| (r as f64 - rounded_root).abs() <= tolerance)
@@ -118,10 +116,7 @@ impl ASTWrapper {
                             }
                         }
                     }
-                    Err(e) => eprintln!(
-                        "Error finding root in interval ({}, {}): {}",
-                        left, right, e
-                    ),
+                    Err(e) => return Err(e),
                 }
             }
 
@@ -131,9 +126,30 @@ impl ASTWrapper {
         Ok(roots)
     }
 
-    pub fn find_roots(&mut self, a: Option<f64>, b: Option<f64>) -> Result<Vec<f64>, String> {
+    /// More friendly, with defaults
+    pub fn find_roots(
+        &mut self,
+        a: Option<f64>,
+        b: Option<f64>,
+    ) -> Result<Vec<f64>, CompilerError> {
         let a = a.unwrap_or_else(|| get_and_parse_user_input("a"));
         let b = b.unwrap_or_else(|| get_and_parse_user_input("b"));
-        self.find_all_roots_bisection(1e-6, 1000, 0.1, a, b)
+        self.find_all_roots(1e-6, 1000, 0.1, a, b)
+    }
+
+    pub fn roots_string(
+        &mut self,
+        a: Option<f64>,
+        b: Option<f64>,
+    ) -> Result<String, CompilerError> {
+        let roots = self.find_roots(a, b)?;
+
+        let roots_str = roots
+            .iter()
+            .map(|root| format!("{:.3}", root))
+            .collect::<Vec<String>>()
+            .join(", ");
+
+        Ok(roots_str)
     }
 }

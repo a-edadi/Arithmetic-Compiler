@@ -8,13 +8,19 @@ pub mod roots;
 pub mod utils;
 pub mod var_manager;
 
-use crate::errors::{eval::EvaluationError, parser::ParserError, CompilerError};
+use crate::errors::{
+    eval::EvaluationError, parser::ParserError, plot::PlottingError, root_finder::RootFinderError,
+    CompilerError,
+};
 use crate::lexer::{
     span::TextSpan,
     token::{Num, Token, TokenKind},
     Lexer,
 };
 use ast::{ASTNode, ASTWrapper};
+use eval::Evaluator;
+use plot::FunctionPlotter;
+use roots::RootFinder;
 use utils::{generate_random_4_digits, get_and_parse_user_input};
 use var_manager::VariableManager;
 

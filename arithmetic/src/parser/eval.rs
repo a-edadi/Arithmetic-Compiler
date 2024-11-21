@@ -1,13 +1,27 @@
-use super::{ASTNode, ASTWrapper, CompilerError, EvaluationError, Num, TextSpan, TokenKind};
+use super::{ASTNode, CompilerError, EvaluationError, Num, TextSpan, TokenKind, VariableManager};
+use std::collections::VecDeque;
 use std::f64::consts::{E, PI};
 
-impl ASTWrapper {
-    pub fn evaluate(&mut self) -> Result<f64, CompilerError> {
-        // Clone or temporarily take ownership of the AST to avoid conflicts
-        let ast = self.ast.clone();
+pub struct Evaluator<'a> {
+    pub stack: VecDeque<f64>,
+    pub vars: &'a mut VariableManager,
+}
 
-        // Process the cloned AST
-        self.process_node(&ast)?;
+impl<'a> Evaluator<'a> {
+    pub fn new(vars: &'a mut VariableManager) -> Self {
+        Self {
+            vars,
+            stack: VecDeque::new(),
+        }
+    }
+
+    pub fn evaluate_with_x(&mut self, node: &ASTNode, x: f64) -> Result<f64, CompilerError> {
+        self.vars.set("x".to_string(), Num::Float(x));
+        self.evaluate(node)
+    }
+
+    pub fn evaluate(&mut self, node: &ASTNode) -> Result<f64, CompilerError> {
+        self.process_node(&node)?;
 
         // Get the final result
         self.get_result()
@@ -56,7 +70,7 @@ impl ASTWrapper {
     }
 
     fn process_identifier(&mut self, id: &str, _: &TextSpan) -> Result<(), CompilerError> {
-        let value = self.vars.get_variable_value(id);
+        let value = self.vars.get(id);
 
         match value {
             Num::Integer(i) => self.stack.push_back(i as f64),

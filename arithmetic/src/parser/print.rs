@@ -32,7 +32,7 @@ pub fn print_evaluation(input: &str) {
         Ok(ast) => {
             let mut ast_wrapper = ASTWrapper::new(ast);
 
-            match ast_wrapper.evaluate() {
+            match ast_wrapper.evaluate_ast() {
                 Ok(result) => println!("Evaluation result: {}", result),
                 Err(error) => eprintln!("Evaluation error: {:?}", error),
             }
