@@ -1,8 +1,9 @@
+mod ast;
 mod errors;
 mod lexer;
 mod parser;
 
-use parser::utils::ultimate::{ultimate_ast_postfix_eval, ultimate_root_plot};
+use ast::utils::ultimate::{ultimate_ast_postfix_eval, ultimate_root_plot};
 
 fn main() {
     let input = "-(- sIn (x  * 4*arctan(1)/ 180) //term
