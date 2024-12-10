@@ -104,6 +104,15 @@ impl<'a> RootFinder<'a> {
         let (expanded_a, expanded_b) = Self::expand_interval(a, b);
         let mut left = expanded_a;
 
+        // Check boundary points
+        for boundary in &[a, b] {
+            if let Ok(value) = self.evaluate_at(*boundary) {
+                if value.abs() <= tolerance && !Self::is_duplicate(*boundary, &roots, tolerance) {
+                    roots.push(*boundary);
+                }
+            }
+        }
+
         while left < expanded_b {
             let right = (left + step_size).min(expanded_b);
 
@@ -122,6 +131,7 @@ impl<'a> RootFinder<'a> {
             left = right;
         }
 
+        roots.sort_by(|a, b| a.partial_cmp(b).unwrap());
         Ok(roots)
     }
 
@@ -135,9 +145,9 @@ impl<'a> RootFinder<'a> {
         let b = b.unwrap_or_else(|| get_and_parse_user_input("b"));
 
         // Default parameters
-        const TOLERANCE: f64 = 1e-6;
-        const MAX_ITERATIONS: usize = 1000;
-        const STEP_SIZE: f64 = 0.1;
+        const TOLERANCE: f64 = 1e-9;
+        const MAX_ITERATIONS: usize = 10000;
+        const STEP_SIZE: f64 = 0.01;
 
         self.find_all_roots(TOLERANCE, MAX_ITERATIONS, STEP_SIZE, a, b)
     }

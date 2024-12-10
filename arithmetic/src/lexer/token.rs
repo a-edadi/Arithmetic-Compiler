@@ -15,7 +15,6 @@ pub enum TokenKind {
     Mantissa(String),
 
     // Identifier
-    Func,
     Identifier(String),
 
     // Operators
@@ -27,7 +26,7 @@ pub enum TokenKind {
     Mod,
     Power,
 
-    // Separators and precedence
+    // Separators a
     LeftParen,
     RightParen,
 
@@ -87,7 +86,6 @@ impl fmt::Display for TokenKind {
         match self {
             TokenKind::Number(num) => write!(f, "Number({})", num),
             TokenKind::Identifier(string) => write!(f, "Identifier({})", string),
-            TokenKind::Func => write!(f, "Func"),
             TokenKind::Plus => write!(f, "+"),
             TokenKind::Minus => write!(f, "-"),
             TokenKind::Multiply => write!(f, "*"),

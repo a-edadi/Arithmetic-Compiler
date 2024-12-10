@@ -10,5 +10,3 @@ impl std::fmt::Display for RootFinderError {
         write!(f, "{:?}", self)
     }
 }
-
-// impl Error for RootFinderError {}

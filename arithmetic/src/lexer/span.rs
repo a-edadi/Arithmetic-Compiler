@@ -6,7 +6,7 @@ pub struct TextSpan {
     pub end: usize,
     pub literal: String,
     pub line: usize,
-    pub column: usize, // remove?
+    pub column: usize,
 }
 
 impl TextSpan {

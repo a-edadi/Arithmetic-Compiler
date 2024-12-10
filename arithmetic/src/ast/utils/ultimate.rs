@@ -18,12 +18,12 @@ pub fn ultimate_ast_postfix_eval(input: &str) {
                     println!("Evaluation result: {}", result);
                 }
                 Err(e) => {
-                    eprintln!("Evaluation error: {}", e);
+                    eprintln!("{}", e);
                     return;
                 }
             }
         }
-        Err(error) => eprintln!("Error parsing input: {}", error),
+        Err(error) => eprintln!("{}", error),
     }
 }
 

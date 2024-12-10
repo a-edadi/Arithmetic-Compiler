@@ -95,7 +95,6 @@ impl<'a> Lexer<'a> {
             let identifier_lower = identifier.to_lowercase();
 
             match identifier_lower.as_str() {
-                "f" => TokenKind::Func, // TODO
                 "sin" => TokenKind::Sin,
                 "cos" => TokenKind::Cos,
                 "tan" => TokenKind::Tan,

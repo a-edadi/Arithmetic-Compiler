@@ -18,9 +18,9 @@ pub fn lex_print_parse_input(input: &str) -> Result<ASTNode, String> {
         Ok(tokens_string) => {
             println!("Lexer Output. Token Stream:\n{}", tokens_string);
         }
-        Err(e) => {
-            eprintln!("{}", e);
-        }
+        // this same error is raised in the parsing stage since parser uses lexer
+        // return None and let parser return this error to avoid printing the error twice
+        Err(_) => {}
     }
 
     lexer.reset();

@@ -4,6 +4,7 @@ use crate::ast::ast::ASTNode;
 use crate::errors::{parser::ParserError, CompilerError};
 use crate::lexer::token::{Token, TokenKind};
 use crate::lexer::Lexer;
+
 pub struct Parser<'a> {
     lexer: Lexer<'a>,
     current_token: Token,
@@ -77,7 +78,7 @@ impl<'a> Parser<'a> {
             let span = self.current_token.span.clone();
 
             self.advance()?;
-            let right_node = self.parse_exponentiation()?; // Recursion to handle right-associativity
+            let right_node = self.parse_exponentiation()?;
 
             node = ASTNode::BinaryOp(Box::new(node), op, Box::new(right_node), span);
         }

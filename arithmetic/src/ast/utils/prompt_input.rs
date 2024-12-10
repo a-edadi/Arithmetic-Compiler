@@ -1,5 +1,6 @@
 use std::io::{self, Write};
 
+// Get Input from user and convert it into f64
 pub fn get_and_parse_user_input(name: &str) -> f64 {
     loop {
         println!("\nPlease Enter the value for {}:", name);

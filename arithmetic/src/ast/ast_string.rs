@@ -74,7 +74,7 @@ impl ASTNode {
                 let mut result = format!(
                     "{}{}{}\n",
                     prefix,
-                    if is_left { "├── " } else { "└── " },
+                    if is_left { "├──" } else { "└── " },
                     func
                 );
                 let new_prefix = format!("{}{}", prefix, if is_left { "│   " } else { "    " });

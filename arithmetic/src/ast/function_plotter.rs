@@ -1,6 +1,6 @@
 use super::{
     ast::ASTNode, generate_random_4_digits, get_and_parse_user_input, CompilerError, Evaluator,
-    Num, PlottingError, RootFinder, VariableManager,
+    PlottingError, RootFinder, VariableManager,
 };
 use plotters::prelude::*;
 use std::fs;
@@ -13,11 +13,10 @@ impl<'a> FunctionPlotter<'a> {
     pub fn new(vars: &'a mut VariableManager) -> Self {
         Self { vars }
     }
-
+    
     fn evaluate_with_x(&mut self, ast: &ASTNode, x: f64) -> Result<f64, CompilerError> {
         let mut evaluator = Evaluator::new(self.vars);
-        evaluator.vars.set("x".to_string(), Num::Float(x));
-        evaluator.evaluate(ast)
+        evaluator.evaluate_with_x(ast, x)
     }
 
     pub fn plot_function(
