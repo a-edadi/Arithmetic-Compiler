@@ -2,9 +2,10 @@ mod ast;
 mod errors;
 mod lexer;
 mod parser;
+mod utils;
 use std::fs;
 
-use ast::utils::ultimate::{ultimate_ast_postfix_eval, ultimate_root_plot};
+use utils::ultimate::{ultimate_ast_postfix_eval, ultimate_root_plot};
 
 fn main() {
     //Amirhossein Edadi, Amin OwrangPour, Amin Sheikh Azimi
