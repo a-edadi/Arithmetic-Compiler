@@ -2,8 +2,7 @@ use super::{ASTNode, CompilerError, EvaluationError, Num, TextSpan, TokenKind, V
 use std::collections::VecDeque;
 use std::f64::consts::{E, PI};
 
-// VecDeque is a double-ended queue which in this case we have used as stack and only 1 side
-// Rust dose not have a built in stack and VecDeque has been used to avoid creating the stack data structure manually
+/// Evaluate the tree using postfix notation and a stack
 pub struct Evaluator<'a> {
     pub stack: VecDeque<f64>,
     pub vars: &'a mut VariableManager,
@@ -17,6 +16,7 @@ impl<'a> Evaluator<'a> {
         }
     }
 
+    /// Evaluate f(x) with any given value
     pub fn evaluate_with_x(&mut self, node: &ASTNode, x: f64) -> Result<f64, CompilerError> {
         self.vars.set("x".to_string(), Num::Float(x));
         self.evaluate(node)
@@ -42,20 +42,24 @@ impl<'a> Evaluator<'a> {
             ASTNode::BinaryOp(left, op, right, span) => {
                 // Traverse left subtree first
                 self.postfix_traverse(left)?;
-                // Then right subtree
+
+                // Traverse right subtree
                 self.postfix_traverse(right)?;
-                // Then apply the binary operation
+
+                // Apply the binary operation
                 self.apply_binary_op(op, span)
             }
             ASTNode::UnaryOp(op, expr, span) => {
                 // Traverse the expression
                 self.postfix_traverse(expr)?;
-                // Then apply the unary operation
+
+                // Apply the unary operation
                 self.apply_unary_op(op, span)
             }
             ASTNode::FunctionCall(func, arg, span) => {
                 // Traverse the argument
                 self.postfix_traverse(arg)?;
+
                 // Then apply the function
                 self.apply_function_call(func, span)
             }

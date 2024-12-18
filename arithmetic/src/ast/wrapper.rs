@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 use super::{
-    root_finder::RootFinder, ASTNode, CompilerError, Evaluator, FunctionPlotter, VariableManager,
+    root::RootFinder, ASTNode, CompilerError, Evaluator, FunctionPlotter, VariableManager,
 };
 pub struct ASTWrapper {
     pub ast: ASTNode,

@@ -1,6 +1,6 @@
 pub mod factor;
 
-use crate::ast::ast::ASTNode;
+use crate::ast::ASTNode;
 use crate::errors::{parser::ParserError, CompilerError};
 use crate::lexer::token::{Token, TokenKind};
 use crate::lexer::Lexer;

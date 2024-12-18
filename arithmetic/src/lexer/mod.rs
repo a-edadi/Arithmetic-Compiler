@@ -1,4 +1,3 @@
-pub mod comments;
 pub mod controllers;
 pub mod handlers;
 pub mod print;
@@ -10,6 +9,7 @@ use crate::errors::{lexer::LexerError, CompilerError};
 use span::TextSpan;
 use token::{Num, Token, TokenKind};
 
+/// Lexer: lexes the input and returns token stream
 pub struct Lexer<'a> {
     input: &'a str,
     pub pos: usize,
@@ -27,11 +27,11 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    /// The core lexer  logic
+    /// The core lexer logic
     pub fn get_next_token(&mut self) -> Result<Token, CompilerError> {
         self.skip_whitespace();
 
-        // Ensure that the lexer is in bound and not lexing out of range
+        // Ensure that the lexer is in bound.
         if self.pos >= self.input.len() {
             let eof_char: char = '\0';
             return Ok(Token::new(
@@ -108,18 +108,12 @@ impl<'a> Lexer<'a> {
                 "exp" => TokenKind::Exp,
                 "sqrt" => TokenKind::Sqrt,
                 "sqr" => TokenKind::Sqr,
-
-                // Div and Mod operators
-                // Handled here due to being alphabetic
                 "div" => TokenKind::Div,
                 "mod" => TokenKind::Mod,
-
-                // Constants
                 "e" => TokenKind::Euler,
                 "pi" => TokenKind::Pi,
 
                 _ => {
-                    // should not happen due to the way we handle numbers remove?
                     if identifier_lower
                         .chars()
                         .next()

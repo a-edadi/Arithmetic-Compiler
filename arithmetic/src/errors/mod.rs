@@ -2,14 +2,14 @@ pub mod eval;
 pub mod lexer;
 pub mod parser;
 pub mod plot;
-pub mod root_finder;
+pub mod root;
 
 use crate::lexer::token::TokenKind;
 use eval::EvaluationError;
 use lexer::LexerError;
 use parser::ParserError;
 use plot::PlottingError;
-use root_finder::RootFinderError;
+use root::RootFinderError;
 use std::fmt;
 
 #[derive(Debug, PartialEq)]

@@ -11,6 +11,7 @@ pub fn lex_parse_input(input: &str) -> Result<ASTNode, String> {
     }
 }
 
+
 pub fn lex_print_parse_input(input: &str) -> Result<ASTNode, String> {
     let mut lexer = Lexer::new(input);
 

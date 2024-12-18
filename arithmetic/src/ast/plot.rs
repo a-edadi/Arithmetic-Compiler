@@ -1,5 +1,5 @@
 use super::{
-    ast::ASTNode, generate_random_4_digits, get_and_parse_user_input, CompilerError, Evaluator,
+    generate_random_4_digits, get_and_parse_user_input, ASTNode, CompilerError, Evaluator,
     PlottingError, RootFinder, VariableManager,
 };
 use plotters::prelude::*;
@@ -13,9 +13,9 @@ impl<'a> FunctionPlotter<'a> {
     pub fn new(vars: &'a mut VariableManager) -> Self {
         Self { vars }
     }
-    
+
     fn evaluate_with_x(&mut self, ast: &ASTNode, x: f64) -> Result<f64, CompilerError> {
-        let mut evaluator = Evaluator::new(self.vars);
+        let mut evaluator: Evaluator<'_> = Evaluator::new(self.vars);
         evaluator.evaluate_with_x(ast, x)
     }
 

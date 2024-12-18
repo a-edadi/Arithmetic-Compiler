@@ -1,4 +1,4 @@
-use super::{ast::ASTNode, get_and_parse_user_input, CompilerError, Evaluator, RootFinderError};
+use super::{get_and_parse_user_input, ASTNode, CompilerError, Evaluator, RootFinderError};
 
 pub struct RootFinder<'a> {
     ast: &'a ASTNode,                 // Expression to find roots for
@@ -135,7 +135,7 @@ impl<'a> RootFinder<'a> {
         Ok(roots)
     }
 
-    /// User-friendly method with default parameters
+    /// friendly method with default parameters
     pub fn find_roots(
         &mut self,
         a: Option<f64>,
