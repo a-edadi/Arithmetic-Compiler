@@ -1,6 +1,5 @@
 pub mod controllers;
 pub mod handlers;
-pub mod print;
 pub mod span;
 pub mod token;
 pub mod utils;

@@ -1,9 +1,11 @@
-use super::{get_and_parse_user_input, lex_parse_input, lex_print_parse_input, ASTWrapper};
+use super::{get_and_parse_user_input, lex_parse_input, print::print_lexer, ASTWrapper};
 
 /// lexes -> print tokens -> parses -> print tree -> print postfix --
 /// --> evaluate(get variable values from user and evaluate the ast).
 pub fn ultimate_ast_postfix_eval(input: &str) {
-    match lex_print_parse_input(input) {
+    print_lexer(input);
+
+    match lex_parse_input(input) {
         Ok(ast) => {
             let mut wrapper = ASTWrapper::new(ast);
 
@@ -43,7 +45,7 @@ pub fn ultimate_root_plot(input: &str) {
 
             match wrapper.plot(Some(a), Some(b)) {
                 Ok(_) => println!("Function plot generated successfully."),
-                Err(e) => eprintln!("Plotting error: {}", e),
+                Err(e) => eprintln!("{}", e),
             }
         }
         Err(error) => eprintln!("Error parsing input: {}", error),

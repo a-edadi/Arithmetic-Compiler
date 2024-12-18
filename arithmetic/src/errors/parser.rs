@@ -44,3 +44,5 @@ impl fmt::Display for ParserError {
         }
     }
 }
+
+impl std::error::Error for ParserError {}

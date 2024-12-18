@@ -67,3 +67,5 @@ impl fmt::Display for EvaluationError {
         }
     }
 }
+
+impl std::error::Error for EvaluationError {}

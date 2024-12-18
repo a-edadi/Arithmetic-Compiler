@@ -42,3 +42,5 @@ impl fmt::Display for CompilerError {
         }
     }
 }
+
+impl std::error::Error for CompilerError {}

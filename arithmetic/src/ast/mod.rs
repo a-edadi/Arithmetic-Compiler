@@ -13,7 +13,7 @@ use crate::lexer::{
     token::{Num, TokenKind},
 };
 use crate::utils::{
-    prompt_input::get_and_parse_user_input, random_number::generate_random_4_digits,
+    prompt::get_and_parse_user_input, rand::generate_random_4_digits,
 };
 
 use eval::Evaluator;

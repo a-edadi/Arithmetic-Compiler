@@ -46,7 +46,7 @@ impl<'a> FunctionPlotter<'a> {
         let mut root_finder = RootFinder::new(ast, &mut evaluator);
         let roots = root_finder
             .find_roots(Some(a), Some(b))
-            .map_err(|_| CompilerError::Plot(PlottingError::GenericPlottingError))?;
+            .map_err(|_| CompilerError::Plot(PlottingError::GenericError))?;
 
         // Pre-calculate root y-values
         let mut root_points = Vec::new();
@@ -82,7 +82,7 @@ impl<'a> FunctionPlotter<'a> {
         // Create the plot
         let root = BitMapBackend::new(&file_path, (1920, 1080)).into_drawing_area();
         root.fill(&WHITE)
-            .map_err(|_| CompilerError::Plot(PlottingError::GenericPlottingError))?;
+            .map_err(|_| CompilerError::Plot(PlottingError::GenericError))?;
 
         let mut chart = ChartBuilder::on(&root)
             .caption("Function Plot", ("sans-serif", 40).into_font())
@@ -90,7 +90,7 @@ impl<'a> FunctionPlotter<'a> {
             .x_label_area_size(30)
             .y_label_area_size(30)
             .build_cartesian_2d(a..b, (y_min - y_padding)..(y_max + y_padding))
-            .map_err(|_| CompilerError::Plot(PlottingError::GenericPlottingError))?;
+            .map_err(|_| CompilerError::Plot(PlottingError::GenericError))?;
 
         // Draw mesh
         chart
@@ -98,7 +98,7 @@ impl<'a> FunctionPlotter<'a> {
             .x_labels(10)
             .y_labels(10)
             .draw()
-            .map_err(|_| CompilerError::Plot(PlottingError::GenericPlottingError))?;
+            .map_err(|_| CompilerError::Plot(PlottingError::GenericError))?;
 
         // Draw function
         chart
@@ -106,7 +106,7 @@ impl<'a> FunctionPlotter<'a> {
                 x_values.into_iter().zip(y_values.into_iter()),
                 &RED,
             ))
-            .map_err(|_| CompilerError::Plot(PlottingError::GenericPlottingError))?;
+            .map_err(|_| CompilerError::Plot(PlottingError::GenericError))?;
 
         // Draw roots
         if !root_points.is_empty() {
@@ -116,11 +116,11 @@ impl<'a> FunctionPlotter<'a> {
                         .iter()
                         .map(|&(x, y)| Circle::new((x, y), 5, RED.filled())),
                 )
-                .map_err(|_| CompilerError::Plot(PlottingError::GenericPlottingError))?;
+                .map_err(|_| CompilerError::Plot(PlottingError::GenericError))?;
         }
 
         root.present()
-            .map_err(|_| CompilerError::Plot(PlottingError::GenericPlottingError))?;
+            .map_err(|_| CompilerError::Plot(PlottingError::GenericError))?;
 
         println!("Plot saved as {}", file_path);
 
